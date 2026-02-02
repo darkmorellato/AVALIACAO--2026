@@ -57,10 +57,6 @@
         }
 
         /* =======================================================
-           Barra Lateral (Sidebar) - Removida
-           ======================================================= */
-
-        /* =======================================================
            Conteúdo Principal
            ======================================================= */
         .main-content {
@@ -68,54 +64,42 @@
             padding: 32px;
         }
 
-        /* Apenas o cabeçalho, sem o estilo de cartão para evitar duplicação */
-        /*
-        .main-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        */
-
         .main-header h1 {
             font-size: 2em;
             font-weight: 700;
             margin: 0;
         }
         
-        .header-actions {
+        /* Controles de filtro de data */
+        .date-filter {
             display: flex;
-            align-items: center;
+            justify-content: center;
             gap: 16px;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .user-profile img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
+            margin-bottom: 24px;
         }
 
         .date-filter button {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            transition: all 0.2s ease;
             font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .date-filter button:hover {
+            background-color: #f9fafb;
         }
 
         .date-filter button.active {
             background-color: var(--sidebar-active);
             color: #ffffff;
             border-color: var(--sidebar-active);
+            transform: scale(1.05);
         }
 
         .card-metrics {
@@ -180,6 +164,7 @@
             text-align: center; /* Centraliza o texto */
             padding: 24px;
             border: none;
+            margin-bottom: 24px;
         }
         
         /* Ajusta o h1 dentro do novo card de cabeçalho */
@@ -187,6 +172,11 @@
             color: #ffffff; /* Garante que a cor do texto do h1 seja branca */
             margin: 0;
             font-size: 1.8em;
+        }
+        
+        .period-label {
+            /* Garante que o texto dinâmico herde o estilo do h1 */
+            font-weight: 700;
         }
 
         .card h2 {
@@ -274,15 +264,21 @@
 <body>
 
 <div class="dashboard-layout">
-    <!-- O elemento da barra lateral foi removido, agora o conteúdo principal ocupa a tela inteira -->
     <main class="main-content">
         <!-- O cabeçalho agora está dentro de um 'card' para seguir o padrão visual -->
         <div class="card header-card">
-            <h1>Avaliações de Vendas <br> Análise Detalhada — Dezembro</h1>
+            <!-- Título restaurado para incluir "Análise Detalhada —" conforme o original -->
+            <h1>Avaliações de Vendas <br> Análise Detalhada — <span id="period-display" class="period-label">Janeiro 2026</span></h1>
+        </div>
+
+        <!-- Seletor de Período -->
+        <div class="date-filter">
+            <button onclick="switchPeriod('2025-12')" id="btn-2025-12">Dezembro 2025</button>
+            <button onclick="switchPeriod('2026-01')" id="btn-2026-01" class="active">Janeiro 2026</button>
         </div>
 
         <section class="card-metrics">
-            <!-- Card de Avaliações Anteriores movido para a primeira posição -->
+            <!-- Card de Avaliações Anteriores -->
             <div class="metric-card">
                 <div class="icon"><i class="fa-solid fa-history" style="color: #53524c;"></i></div>
                 <div>
@@ -290,7 +286,7 @@
                     <div class="label">Avaliações Anteriores</div>
                 </div>
             </div>
-            <!-- Card de Avaliações Recentes movido para a segunda posição -->
+            <!-- Card de Avaliações Recentes -->
             <div class="metric-card">
                 <div class="icon"><i class="fa-solid fa-star" style="color: #f5da55;"></i></div>
                 <div>
@@ -347,18 +343,36 @@
     // Registra o plugin de data labels globalmente para poder usá-lo nos gráficos
     Chart.register(ChartDataLabels);
 
-    // Dados para os gráficos e tabela
-    const storesData = {
-        'DOM PEDRO': { prev: 617, current: 686, sales: 151, evaluated: 69 },
-        'KASSOUF':   { prev: 383, current: 404, sales: 46, evaluated: 21 },
-        'PREMIUM':   { prev: 385, current: 447, sales: 67, evaluated: 62 },
-        'REALME':    { prev: 299, current: 326, sales: 55, evaluated: 27 },
-        'XV':        { prev: 193, current: 201, sales: 56, evaluated: 8 }
+    // Banco de Dados completo
+    const database = {
+        '2025-12': {
+            label: 'Dezembro 2025',
+            // DADOS VERIFICADOS: Mantidos exatamente como no arquivo original
+            data: {
+                'DOM PEDRO': { prev: 617, current: 686, sales: 151, evaluated: 69 },
+                'KASSOUF':   { prev: 383, current: 404, sales: 46, evaluated: 21 },
+                'PREMIUM':   { prev: 385, current: 447, sales: 67, evaluated: 62 },
+                'REALME':    { prev: 299, current: 326, sales: 55, evaluated: 27 },
+                'XV':        { prev: 193, current: 201, sales: 56, evaluated: 8 }
+            }
+        },
+        '2026-01': {
+            label: 'Janeiro 2026',
+            data: {
+                'DOM PEDRO': { prev: 686, current: 733, sales: 118, evaluated: 47 },
+                'KASSOUF':   { prev: 404, current: 445, sales: 66, evaluated: 41 },
+                'PREMIUM':   { prev: 447, current: 465, sales: 41, evaluated: 18 },
+                'REALME':    { prev: 326, current: 357, sales: 55, evaluated: 31 },
+                'XV':        { prev: 201, current: 215, sales: 35, evaluated: 14 }
+            }
+        }
     };
 
-    // Mapeia os nomes das lojas para os Content Fetch IDs das imagens enviadas
-    // CORREÇÃO: O código agora usa a URL correta para as imagens,
-    // garantindo que elas sejam exibidas no navegador.
+    // Estado atual
+    let currentPeriod = '2026-01'; // Define o padrão inicial para Janeiro 2026
+    let conversionChartInstance = null; // Variável para armazenar a instância do gráfico
+
+    // Mapeia os nomes das lojas para imagens (mantido do original)
     const storeLogos = {
         'DOM PEDRO': 'Untitled-dom pedro.png',
         'KASSOUF':   'Untitled-kassouf.png',
@@ -369,26 +383,39 @@
 
     const percent = (part, total) => total > 0 ? ((part / total) * 100).toFixed(2) : 0;
 
+    // Função principal para trocar o período
+    function switchPeriod(period) {
+        if (!database[period]) return;
+        currentPeriod = period;
+
+        // Atualiza botões
+        document.querySelectorAll('.date-filter button').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`btn-${period}`).classList.add('active');
+
+        // Atualiza Título
+        document.getElementById('period-display').textContent = database[period].label;
+
+        // Atualiza componentes
+        initDashboard();
+    }
+
     // Função para atualizar os cards de métricas
     function updateMetrics() {
+        const storesData = database[currentPeriod].data;
         const totalReviews = Object.values(storesData).reduce((acc, curr) => acc + curr.current, 0);
-        const totalPrevReviews = Object.values(storesData).reduce((acc, curr) => acc + curr.prev, 0); // Cálculo das avaliações anteriores
+        const totalPrevReviews = Object.values(storesData).reduce((acc, curr) => acc + curr.prev, 0); 
         const totalSales = Object.values(storesData).reduce((acc, curr) => acc + curr.sales, 0);
         const totalEvaluated = Object.values(storesData).reduce((acc, curr) => acc + curr.evaluated, 0);
 
         document.getElementById('total-reviews').textContent = totalReviews.toLocaleString('pt-BR');
-        document.getElementById('total-prev-reviews').textContent = totalPrevReviews.toLocaleString('pt-BR'); // Atualização do novo card
+        document.getElementById('total-prev-reviews').textContent = totalPrevReviews.toLocaleString('pt-BR');
         document.getElementById('total-sales').textContent = totalSales.toLocaleString('pt-BR');
         document.getElementById('total-evaluated').textContent = totalEvaluated.toLocaleString('pt-BR');
     }
 
-    /**
-     * Obtém as cores do tema atual para os gráficos e barras.
-     * @returns {object} Um objeto com as cores do tema.
-     */
     function getThemeColors() {
         const style = getComputedStyle(document.body);
-        const colors = {
+        return {
             positive: style.getPropertyValue('--chart-color-positive'),
             negative: style.getPropertyValue('--chart-color-negative'),
             low: style.getPropertyValue('--chart-color-low'),
@@ -399,111 +426,87 @@
             tickColor: '#6b7280',
             fontColor: '#1f2937'
         };
-        return colors;
     }
 
-    /**
-     * Cria e renderiza um gráfico Chart.js.
-     * @param {string} id - O ID do elemento canvas.
-     * @param {string} type - O tipo de gráfico (e.g., 'bar', 'line').
-     * @param {string[]} labels - Os rótulos do eixo X.
-     * @param {object} dataset - O objeto de dados do gráfico.
-     * @param {object} options - Opções de configuração do gráfico.
-     */
-    function createChart(id, type, labels, dataset, options) {
-        new Chart(document.getElementById(id), {
-            type,
-            data: { labels, datasets: [dataset] },
+    function renderCharts() {
+        const storesData = database[currentPeriod].data;
+        const lojas = Object.keys(storesData);
+        const themeColors = getThemeColors();
+
+        // Dados
+        const convData = lojas.map(l => parseFloat(percent(storesData[l].evaluated, storesData[l].sales)));
+        
+        // Cálculo de escala Y
+        const maxConv = Math.max(...convData);
+        const newYMax = Math.ceil((maxConv * 1.1) / 10) * 10;
+        const yAxisMax = newYMax > 0 ? newYMax : 100;
+
+        // Destroi gráfico anterior se existir
+        if (conversionChartInstance) {
+            conversionChartInstance.destroy();
+        }
+
+        const ctx = document.getElementById('conversionChart');
+        
+        conversionChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: { 
+                labels: lojas, 
+                datasets: [{
+                    label: 'Aproveitamento (%)',
+                    data: convData,
+                    backgroundColor: convData.map(v => 
+                        v <= 30 ? themeColors.low : 
+                        v <= 50 ? themeColors.medium : 
+                        v <= 75 ? themeColors.good : themeColors.great
+                    ),
+                    borderRadius: 8
+                }]
+            },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: {
-                    duration: 1500,
+                    duration: 1000,
                     easing: 'easeOutQuart'
                 },
                 plugins: {
-                    legend: {
-                        display: false // Oculta a legenda, pois o estilo da imagem não a tem
-                    },
+                    legend: { display: false },
                     tooltip: {
                         callbacks: {
                             label: c => `${c.dataset.label}: ${c.parsed.y}%`
                         }
                     },
-                    ...options.plugins // Adiciona opções de plugin passadas
+                    datalabels: {
+                        color: '#ffffff',
+                        anchor: 'center',
+                        align: 'center',
+                        font: { weight: 'bold' },
+                        formatter: (value) => `${value}%`
+                    }
                 },
-                scales: options.scales,
-                borderRadius: options.borderRadius
-            }
-        });
-    }
-
-    /**
-     * Renderiza os gráficos com base nos dados.
-     */
-    function renderCharts() {
-        const lojas = Object.keys(storesData);
-        const themeColors = getThemeColors();
-
-        // Gráfico de Aproveitamento de Avaliações
-        // Usamos parseFloat para poder calcular o valor máximo
-        const convData = lojas.map(l => parseFloat(percent(storesData[l].evaluated, storesData[l].sales)));
-        
-        // Encontra o maior valor nos dados
-        const maxConv = Math.max(...convData);
-        
-        // Calcula o novo máximo para o eixo Y (10% a mais que o maior valor)
-        // Arredondamos para cima para o próximo múltiplo de 10 para uma escala mais limpa
-        const newYMax = Math.ceil((maxConv * 1.1) / 10) * 10;
-        
-        // Se o valor máximo for 0, definimos um padrão de 100
-        const yAxisMax = newYMax > 0 ? newYMax : 100;
-
-        createChart('conversionChart', 'bar', lojas, {
-            label: 'Aproveitamento (%)',
-            data: convData,
-            backgroundColor: convData.map(v => 
-                v <= 30 ? themeColors.low : 
-                v <= 50 ? themeColors.medium : 
-                v <= 75 ? themeColors.good : themeColors.great
-            ),
-            borderRadius: 8
-        }, {
-            scales: {
-                y: {
-                    max: yAxisMax, // Atualizado: usa o valor máximo calculado
-                    title: { display: true, text: 'Aproveitamento (%)', color: themeColors.tickColor },
-                    ticks: { color: themeColors.tickColor },
-                    grid: { color: themeColors.gridColor }
-                },
-                x: {
-                    ticks: { color: themeColors.tickColor },
-                    grid: { color: themeColors.gridColor }
-                }
-            },
-            plugins: {
-                datalabels: {
-                    color: '#ffffff',
-                    anchor: 'center',
-                    align: 'center',
-                    font: {
-                        weight: 'bold'
+                scales: {
+                    y: {
+                        max: yAxisMax,
+                        title: { display: true, text: 'Aproveitamento (%)', color: themeColors.tickColor },
+                        ticks: { color: themeColors.tickColor },
+                        grid: { color: themeColors.gridColor }
                     },
-                    formatter: (value) => `${value}%`
+                    x: {
+                        ticks: { color: themeColors.tickColor },
+                        grid: { color: themeColors.gridColor }
+                    }
                 }
             }
         });
     }
 
-    /**
-     * Preenche a tabela com os dados das lojas, ordenando por aproveitamento.
-     */
     function createTableRows() {
+        const storesData = database[currentPeriod].data;
         const tbody = document.getElementById('dataTable');
         tbody.innerHTML = '';
         const themeColors = getThemeColors();
 
-        // Converte o objeto de dados em um array para poder ordená-lo
         const sortedStores = Object.keys(storesData).map(loja => {
             const data = storesData[loja];
             const aproveitamento = percent(data.evaluated, data.sales);
@@ -512,27 +515,21 @@
                 ...data,
                 aproveitamento
             };
-        }).sort((a, b) => b.aproveitamento - a.aproveitamento); // Ordena do maior para o menor aproveitamento
+        }).sort((a, b) => b.aproveitamento - a.aproveitamento);
 
         sortedStores.forEach(item => {
             const tr = document.createElement('tr');
             const { loja, prev, current, sales, evaluated, aproveitamento } = item;
             
-            // Determina a cor da barra com base no valor de aproveitamento
             let barColor = '';
-            if (aproveitamento <= 30) {
-                barColor = themeColors.low;
-            } else if (aproveitamento <= 50) {
-                barColor = themeColors.medium;
-            } else if (aproveitamento <= 75) {
-                barColor = themeColors.good;
-            } else {
-                barColor = themeColors.great;
-            }
+            if (aproveitamento <= 30) barColor = themeColors.low;
+            else if (aproveitamento <= 50) barColor = themeColors.medium;
+            else if (aproveitamento <= 75) barColor = themeColors.good;
+            else barColor = themeColors.great;
 
             tr.innerHTML = `
                 <td>
-                    <img src="${storeLogos[loja]}" alt="Logo da loja ${loja}" class="store-logo">
+                    <img src="${storeLogos[loja]}" alt="Logo ${loja}" class="store-logo">
                     <span class="store-name">${loja}</span>
                 </td>
                 <td class="text-center">${prev}</td>
@@ -552,16 +549,13 @@
         });
     }
 
-    /**
-     * Inicializa todos os componentes do dashboard.
-     */
     function initDashboard() {
         updateMetrics();
         renderCharts();
         createTableRows();
     }
 
-    document.addEventListener('DOMContentLoaded', initDashboard);
+    document.addEventListener('DOMContentLoaded', () => initDashboard());
 </script>
 
 </body>
