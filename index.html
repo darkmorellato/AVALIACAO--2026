@@ -841,24 +841,23 @@
 
             // Criando gradientes personalizados
             const premiumGradient = canvasCtx.createLinearGradient(0, 0, 0, 350);
-            premiumGradient.addColorStop(0, '#bf953f'); // Dark gold
-            premiumGradient.addColorStop(1, '#fcf6ba'); // Gold light
+            premiumGradient.addColorStop(0.1, '#bf953f'); // Dark gold
+            premiumGradient.addColorStop(0.9, '#fcf6ba'); // Gold light
 
             const xvGradient = canvasCtx.createLinearGradient(0, 0, 0, 350);
-            xvGradient.addColorStop(0, '#211b15'); // 0% (Topo) Preto
-            xvGradient.addColorStop(0.6, ''); // Desce em Preto até 60%
-            xvGradient.addColorStop(1, '#e2e8f0'); // Completa com Cinza Claro os últimos 40%
+            xvGradient.addColorStop(1, '#211b15'); // 0% (Topo) Preto
+            xvGradient.addColorStop(0, '#fff5ee'); // Cinza Claro do 80% até a base (100%)
 
             const realmeGradient = canvasCtx.createLinearGradient(0, 0, 0, 350);
             realmeGradient.addColorStop(0, '#ffea00'); // Amarelo puro vibrante (topo)
-            realmeGradient.addColorStop(1, '#ffd700'); // Amarelo Ouro (base)
+            realmeGradient.addColorStop(1, '#f4c430'); // Amarelo Ouro (base)
 
             const kassoufGradient = canvasCtx.createLinearGradient(0, 0, 0, 350);
-            kassoufGradient.addColorStop(0, '#ffb266'); // Laranja mais claro e suave (topo)
+            kassoufGradient.addColorStop(0, '#ff4500'); // Laranja mais claro e suave (topo)
             kassoufGradient.addColorStop(1, '#ff7e01'); // Laranja original (base)
 
             const domPedroGradient = canvasCtx.createLinearGradient(0, 0, 0, 350);
-            domPedroGradient.addColorStop(0, '#64b5f6'); // Azul mais claro, vibrante (topo)
+            domPedroGradient.addColorStop(0, '#add8e6'); // Azul mais claro, vibrante (topo)
             domPedroGradient.addColorStop(1, '#2196f3'); // Azul original (base)
 
             const storeColors = {
