@@ -730,6 +730,14 @@
             'XV': 'Untitled-xv.png'
         };
 
+        // Preload das imagens para o canvas do Chart.js
+        const loadedImages = {};
+        Object.keys(storeLogos).forEach(key => {
+            const img = new Image();
+            img.src = storeLogos[key];
+            loadedImages[key] = img;
+        });
+
         const percent = (part, total) => total > 0 ? ((part / total) * 100).toFixed(2) : 0;
 
         // Função principal para trocar o período temporizada com skeleton effect
@@ -829,6 +837,37 @@
             }
 
             const ctx = document.getElementById('conversionChart');
+            const canvasCtx = ctx.getContext('2d');
+
+            // Criando gradientes personalizados
+            const premiumGradient = canvasCtx.createLinearGradient(0, 0, 0, 350);
+            premiumGradient.addColorStop(0, '#bf953f'); // Dark gold
+            premiumGradient.addColorStop(1, '#fcf6ba'); // Gold light
+
+            const xvGradient = canvasCtx.createLinearGradient(0, 0, 0, 350);
+            xvGradient.addColorStop(0, '#211b15'); // 0% (Topo) Preto
+            xvGradient.addColorStop(0.6, ''); // Desce em Preto até 60%
+            xvGradient.addColorStop(1, '#e2e8f0'); // Completa com Cinza Claro os últimos 40%
+
+            const realmeGradient = canvasCtx.createLinearGradient(0, 0, 0, 350);
+            realmeGradient.addColorStop(0, '#ffea00'); // Amarelo puro vibrante (topo)
+            realmeGradient.addColorStop(1, '#ffd700'); // Amarelo Ouro (base)
+
+            const kassoufGradient = canvasCtx.createLinearGradient(0, 0, 0, 350);
+            kassoufGradient.addColorStop(0, '#ffb266'); // Laranja mais claro e suave (topo)
+            kassoufGradient.addColorStop(1, '#ff7e01'); // Laranja original (base)
+
+            const domPedroGradient = canvasCtx.createLinearGradient(0, 0, 0, 350);
+            domPedroGradient.addColorStop(0, '#64b5f6'); // Azul mais claro, vibrante (topo)
+            domPedroGradient.addColorStop(1, '#2196f3'); // Azul original (base)
+
+            const storeColors = {
+                'DOM PEDRO': domPedroGradient,
+                'KASSOUF': kassoufGradient,
+                'REALME': realmeGradient,
+                'PREMIUM': premiumGradient,
+                'XV': xvGradient
+            };
 
             conversionChartInstance = new Chart(ctx, {
                 type: 'bar',
@@ -837,11 +876,7 @@
                     datasets: [{
                         label: 'Aproveitamento (%)',
                         data: convData,
-                        backgroundColor: convData.map(v =>
-                            v <= 30 ? themeColors.low :
-                                v <= 50 ? themeColors.medium :
-                                    v <= 75 ? themeColors.good : themeColors.great
-                        ),
+                        backgroundColor: lojas.map(loja => storeColors[loja] || themeColors.good),
                         borderRadius: 8
                     }]
                 },
@@ -873,10 +908,11 @@
                             }
                         },
                         datalabels: {
-                            color: '#ffffff',
-                            anchor: 'center',
-                            align: 'center',
-                            font: { weight: 'bold' },
+                            color: '#000000',
+                            anchor: 'end',
+                            align: 'top',
+                            offset: 4,
+                            font: { weight: '800', size: 13, family: 'Inter' },
                             formatter: (value) => `${value}%`
                         }
                     },
@@ -888,11 +924,60 @@
                             grid: { color: themeColors.gridColor }
                         },
                         x: {
-                            ticks: { color: themeColors.tickColor },
+                            ticks: {
+                                color: 'transparent',
+                                padding: 8
+                            },
                             grid: { color: themeColors.gridColor }
                         }
                     }
-                }
+                },
+                plugins: [ChartDataLabels, {
+                    id: 'logoPlugin',
+                    afterDraw(chart) {
+                        const ctx = chart.ctx;
+                        const xAxis = chart.scales.x;
+                        const yAxis = chart.scales.y;
+
+                        ctx.save();
+                        ctx.font = '600 12px Inter, sans-serif'; // fonte padrão para X-axis
+                        ctx.fillStyle = themeColors.tickColor;
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'middle';
+
+                        xAxis.ticks.forEach((tick, index) => {
+                            const label = xAxis.getLabelForValue(tick.value);
+                            const img = loadedImages[label];
+
+                            const textWidth = ctx.measureText(label).width;
+                            const spacing = 6;
+                            const imgSize = 14;
+                            const totalWidth = textWidth + (img && img.complete ? spacing + imgSize : 0);
+
+                            const xCenter = xAxis.getPixelForTick(index);
+                            const currentX = xCenter - totalWidth / 2;
+                            const yCenter = yAxis.bottom + 16;
+
+                            // Texto
+                            ctx.fillText(label, currentX, yCenter);
+
+                            // Imagem à direita
+                            if (img && img.complete) {
+                                const imgX = currentX + textWidth + spacing;
+                                const imgY = yCenter - imgSize / 2;
+
+                                ctx.save();
+                                ctx.beginPath();
+                                ctx.arc(imgX + imgSize / 2, imgY + imgSize / 2, imgSize / 2, 0, Math.PI * 2, true);
+                                ctx.closePath();
+                                ctx.clip();
+                                ctx.drawImage(img, imgX, imgY, imgSize, imgSize);
+                                ctx.restore();
+                            }
+                        });
+                        ctx.restore();
+                    }
+                }]
             });
         }
 
