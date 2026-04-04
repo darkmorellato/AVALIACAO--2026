@@ -594,7 +594,7 @@
         <main class="main-content">
             <!-- O cabeçalho agora está dentro de um 'card' para seguir o padrão visual -->
             <div class="card header-card">
-                <h1>Painel de Vendas <br> Análise Detalhada — <span id="period-display" class="period-label">Fevereiro
+                <h1>Painel de Vendas <br> Análise Detalhada — <span id="period-display" class="period-label">Março
                         2026</span></h1>
             </div>
 
@@ -602,7 +602,8 @@
             <div class="date-filter">
                 <button onclick="switchPeriod('2025-12')" id="btn-2025-12">Dezembro 2025</button>
                 <button onclick="switchPeriod('2026-01')" id="btn-2026-01">Janeiro 2026</button>
-                <button onclick="switchPeriod('2026-02')" id="btn-2026-02" class="active">Fevereiro 2026</button>
+                <button onclick="switchPeriod('2026-02')" id="btn-2026-02">Fevereiro 2026</button>
+                <button onclick="switchPeriod('2026-03')" id="btn-2026-03" class="active">Março 2026</button>
             </div>
 
             <section class="card-metrics">
@@ -714,11 +715,21 @@
                     'REALME': { prev: 357, current: 375, sales: 51, evaluated: 18 },
                     'XV': { prev: 215, current: 245, sales: 43, evaluated: 30 }
                 }
+            },
+            '2026-03': {
+                label: 'Março 2026',
+                data: {
+                    'PREMIUM': { prev: 502, current: 577, sales: 69, evaluated: 75 },
+                    'XV': { prev: 245, current: 289, sales: 65, evaluated: 44 },
+                    'REALME': { prev: 375, current: 402, sales: 46, evaluated: 27 },
+                    'DOM PEDRO': { prev: 754, current: 823, sales: 114, evaluated: 69 },
+                    'KASSOUF': { prev: 457, current: 534, sales: 43, evaluated: 77 }
+                }
             }
         };
 
         // Estado atual
-        let currentPeriod = '2026-02'; // Define o padrão inicial para Fevereiro 2026
+        let currentPeriod = '2026-03'; // Define o padrão inicial para Março 2026
         let conversionChartInstance = null; // Variável para armazenar a instância do gráfico
 
         // Mapeia os nomes das lojas para imagens (mantido do original)
