@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Vendas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <main class="main-content">
+      <div class="top-bar">
+        <div></div>
+        <div>
+          <button id="darkModeToggle" class="btn btn-toggle"><i class="fa-solid fa-moon"></i></button>
+        </div>
+      </div>
+      <div class="card header-card">
+        <h1>Painel de Vendas<br>Analise Detalhada — <span id="period-display" class="period-label">Marco 2026</span></h1>
+      </div>
+      <div class="date-filter" id="dateFilter"></div>
+      <section class="card-metrics">
+        <div class="metric-card">
+          <div class="icon"><i class="fa-solid fa-history"></i></div>
+          <div><div class="value" id="total-prev-reviews"></div><div class="label">Avaliacoes Anteriores</div></div>
+        </div>
+        <div class="metric-card">
+          <div class="icon"><i class="fa-solid fa-star"></i></div>
+          <div><div class="value" id="total-reviews"></div><div class="label">Avaliacoes Recentes</div></div>
+        </div>
+        <div class="metric-card">
+          <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
+          <div><div class="value" id="total-sales"></div><div class="label">Vendas Totais</div></div>
+        </div>
+        <div class="metric-card">
+          <div class="icon"><i class="fa-solid fa-check"></i></div>
+          <div><div class="value" id="total-evaluated"></div><div class="label">Vendas Avaliadas</div></div>
+        </div>
+      </section>
+      <div class="content-grid">
+        <section class="card">
+          <h2>Aproveitamento de Avaliacoes (%)</h2>
+          <div class="chart-container"><canvas id="conversionChart"></canvas></div>
+        </section>
+        <div class="chart-grid">
+          <section class="card">
+            <h2>Evolucao Temporal</h2>
+            <div class="chart-container-sm"><canvas id="trendChart"></canvas></div>
+          </section>
+          <section class="card">
+            <h2>Vendas vs Avaliadas</h2>
+            <div class="chart-container-sm"><canvas id="compareChart"></canvas></div>
+          </section>
+        </div>
+        <section class="card detailed-data-card">
+          <h2>Dados Detalhados</h2>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Loja</th>
+                  <th class="text-center">Avaliacoes Anteriores</th>
+                  <th class="text-center">Avaliacoes Recentes</th>
+                  <th class="text-center">Vendas</th>
+                  <th class="text-center">
+                    <div class="tooltip" data-tooltip="Corresponde a quantas dessas vendas receberam avaliacao.">Vendas Avaliadas <i class="fa-solid fa-circle-info tooltip-icon"></i></div>
+                  </th>
+                  <th class="text-center">
+                    <div class="tooltip" data-tooltip="(Vendas Avaliadas / Vendas Totais) * 100">Aproveitamento (%) <i class="fa-solid fa-circle-info tooltip-icon"></i></div>
+                  </th>
+                  <th>Barra de Progresso</th>
+                </tr>
+              </thead>
+              <tbody id="dataTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

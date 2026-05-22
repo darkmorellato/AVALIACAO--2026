@@ -1,0 +1,10 @@
+{
+  "label": "Janeiro 2026",
+  "data": {
+    "DOM PEDRO": { "prev": 686, "current": 733, "sales": 118, "evaluated": 47 },
+    "KASSOUF":   { "prev": 404, "current": 445, "sales": 66,  "evaluated": 41 },
+    "PREMIUM":   { "prev": 447, "current": 465, "sales": 41,  "evaluated": 18 },
+    "REALME":    { "prev": 326, "current": 357, "sales": 55,  "evaluated": 31 },
+    "XV":        { "prev": 201, "current": 215, "sales": 35,  "evaluated": 14 }
+  }
+}

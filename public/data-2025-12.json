@@ -1,0 +1,10 @@
+{
+  "label": "Dezembro 2025",
+  "data": {
+    "DOM PEDRO": { "prev": 617, "current": 686, "sales": 151, "evaluated": 69 },
+    "KASSOUF":   { "prev": 383, "current": 404, "sales": 46,  "evaluated": 21 },
+    "PREMIUM":   { "prev": 385, "current": 447, "sales": 67,  "evaluated": 62 },
+    "REALME":    { "prev": 299, "current": 326, "sales": 55,  "evaluated": 27 },
+    "XV":        { "prev": 193, "current": 201, "sales": 56,  "evaluated": 8  }
+  }
+}

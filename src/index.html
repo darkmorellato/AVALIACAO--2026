@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Painel de Vendas - Analise Detalhada das lojas com metricas de avaliacao, graficos comparativos e exportacao para PDF.">
+  <meta name="keywords" content="vendas, avaliacao, dashboard, metricas, lojas, PDF, chart">
+  <meta name="author" content="Avaliacao 2026">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#6366f1">
+  <meta property="og:title" content="Painel de Vendas - Analise Detalhada">
+  <meta property="og:description" content="Dashboard completo de metricas de vendas e avaliacoes.">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#6366f1">
+  <title>Painel de Vendas - Analise Detalhada</title>
+
+  <!-- Preconnect para performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Preload de recursos críticos -->
+  <link rel="preload" href="/periods.json" as="fetch" crossorigin="anonymous">
+  <link rel="preload" href="/data-2026-04.json" as="fetch" crossorigin="anonymous">
+
+  <!-- Preload das logos importantes -->
+  <link rel="preload" href="/Untitled-dom pedro.png" as="image" type="image/png">
+  <link rel="preload" href="/Untitled-kassouf.png" as="image" type="image/png">
+  <link rel="preload" href="/Untitled-premium.png" as="image" type="image/png">
+  <link rel="preload" href="/Untitled-realme.png" as="image" type="image/png">
+  <link rel="preload" href="/Untitled-xv.png" as="image" type="image/png">
+
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+  <!-- Critical CSS (inline para first paint) to prevent flash of unstyled content -->
+  <style>
+    :root {
+      --main-bg: #f8fafc;
+      --text: #0f172a;
+    }
+    :root.dark {
+      --main-bg: #0f172a;
+      --text: #f8fafc;
+    }
+    body {
+      margin: 0;
+      background-color: var(--main-bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <noscript>
+    <div style="padding: 24px; text-align: center; font-family: 'Inter', sans-serif; color: #0f172a;">
+      <h2 style="color: #ef4444;">JavaScript Desabilitado</h2>
+      <p>Esta aplicacao requer JavaScript para funcionar. Por favor, habilite o JavaScript no seu navegador e recarregue a pagina.</p>
+    </div>
+  </noscript>
+
+  <div class="dashboard-layout">
+    <main class="main-content">
+      
+      <!-- PREMIUM HEADER SECTION -->
+      <div class="dashboard-header">
+        <div class="header-left">
+          <div class="status-badge">
+            <span class="ping-container">
+              <span class="ping-animate"></span>
+              <span class="ping-dot"></span>
+            </span>
+            Dashboard Atualizado
+          </div>
+          <h1>Painel de Vendas</h1>
+          <p class="subtitle">Visão analítica e métricas de performance das lojas parceiras &mdash; <span id="period-display" class="period-label"></span></p>
+        </div>
+        
+        <div class="header-right">
+          <!-- Seletor de Período -->
+          <div class="date-filter" id="dateFilter" aria-label="Filtro de periodo">
+            <!-- Populado dinamicamente pelo AppController -->
+          </div>
+          
+<!-- Premium Theme Switch -->
+           <div class="custom-switch-wrapper" id="themeSwitch" tabindex="0" role="switch" aria-checked="false">
+             <div class="custom-switch-track">
+               <div class="custom-switch-thumb"></div>
+             </div>
+             <div class="custom-switch-labels">
+               <div class="label-row label-row-on">
+                 <span>ON</span>
+               </div>
+               <div class="label-row label-row-off">
+                 <span>OFF</span>
+               </div>
+             </div>
+           </div>
+        </div>
+      </div>
+
+      <!-- SUMMARY CARDS - REFINED -->
+      <section class="card-metrics" aria-label="Métricas principais">
+        <article class="metric-card metric-indigo">
+          <div class="metric-top">
+            <div class="icon-wrapper">
+              <i class="fa-solid fa-history" aria-hidden="true"></i>
+            </div>
+            <div class="trend-badge positive">
+              <i class="fa-solid fa-arrow-trend-up"></i>
+              +12%
+            </div>
+          </div>
+          <div class="metric-content">
+            <div class="value" id="total-prev-reviews"></div>
+            <div class="label">Avaliações Anteriores</div>
+          </div>
+        </article>
+
+        <article class="metric-card metric-emerald">
+          <div class="metric-top">
+            <div class="icon-wrapper">
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+            </div>
+            <div class="trend-badge positive">
+              <i class="fa-solid fa-arrow-trend-up"></i>
+              +8.5%
+            </div>
+          </div>
+          <div class="metric-content">
+            <div class="value" id="total-reviews"></div>
+            <div class="label">Avaliações Recentes</div>
+          </div>
+        </article>
+
+        <article class="metric-card metric-orange">
+          <div class="metric-top">
+            <div class="icon-wrapper">
+              <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+            </div>
+            <div class="trend-badge negative">
+              <i class="fa-solid fa-arrow-trend-down"></i>
+              -2.4%
+            </div>
+          </div>
+          <div class="metric-content">
+            <div class="value" id="total-sales"></div>
+            <div class="label">Vendas Totais</div>
+          </div>
+        </article>
+
+        <article class="metric-card metric-blue">
+          <div class="metric-top">
+            <div class="icon-wrapper">
+              <i class="fa-solid fa-check" aria-hidden="true"></i>
+            </div>
+            <div class="trend-badge positive">
+              <i class="fa-solid fa-arrow-trend-up"></i>
+              +15%
+            </div>
+          </div>
+          <div class="metric-content">
+            <div class="value" id="total-evaluated"></div>
+            <div class="label">Vendas Avaliadas</div>
+          </div>
+        </article>
+      </section>
+
+      <!-- Content grid -->
+      <div class="content-grid">
+        <!-- Main chart: conversion % -->
+        <section class="card" aria-labelledby="chart-conversion-title">
+          <div class="card-header-wrapper">
+            <h2 id="chart-conversion-title" class="card-title">Aproveitamento de Avaliações</h2>
+            <p class="card-subtitle">Comparativo percentual de conversão por loja parceira</p>
+          </div>
+          <div class="chart-container">
+            <canvas id="conversionChart" fetchpriority="high" role="img" aria-label="Grafico de barras de aproveitamento de avaliacoes"></canvas>
+          </div>
+        </section>
+
+        <!-- Secondary charts -->
+        <div class="chart-grid">
+          <section class="card" aria-labelledby="chart-trend-title">
+            <div class="card-header-wrapper">
+              <h2 id="chart-trend-title" class="card-title">Evolução Temporal</h2>
+              <p class="card-subtitle">Progresso de avaliações nos últimos 5 meses</p>
+            </div>
+            <div class="chart-container-sm">
+              <canvas id="trendChart" loading="lazy" fetchpriority="low" role="img" aria-label="Grafico de linha da evolucao temporal"></canvas>
+            </div>
+          </section>
+          <section class="card" aria-labelledby="chart-compare-title">
+            <div class="card-header-wrapper">
+              <h2 id="chart-compare-title" class="card-title">Vendas vs Avaliadas</h2>
+              <p class="card-subtitle">Comparativo absoluto do mês atual</p>
+            </div>
+            <div class="chart-container-sm">
+              <canvas id="compareChart" loading="lazy" fetchpriority="low" role="img" aria-label="Grafico de barras comparando vendas e avaliadas"></canvas>
+            </div>
+          </section>
+        </div>
+
+        <!-- Detailed data table -->
+        <section class="card detailed-data-card" aria-labelledby="table-title">
+          <div class="card-header-wrapper">
+            <h2 id="table-title" class="card-title">Métricas Detalhadas</h2>
+            <p class="card-subtitle">Tabela consolidada de performance por loja</p>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr class="table-header-row">
+                  <th scope="col">Loja Parceira</th>
+                  <th scope="col" class="text-center">Avaliações Anteriores</th>
+                  <th scope="col" class="text-center">Avaliações Recentes</th>
+                  <th scope="col" class="text-center">Vendas Totais</th>
+                  <th scope="col" class="text-center">
+                    <div class="tooltip" data-tooltip="Corresponde a quantas dessas vendas receberam avaliacao.">
+                      Vendas Avaliadas <i class="fa-solid fa-circle-info tooltip-icon" aria-hidden="true"></i>
+                    </div>
+                  </th>
+                  <th scope="col" class="text-center">
+                    <div class="tooltip" data-tooltip="(Vendas Avaliadas / Vendas Totais) * 100">
+                      Aproveitamento <i class="fa-solid fa-circle-info tooltip-icon" aria-hidden="true"></i>
+                    </div>
+                  </th>
+                  <th scope="col" class="text-center">Progresso</th>
+                </tr>
+              </thead>
+              <tbody id="dataTable">
+                <!-- Populated dynamically by TableRenderer -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Entry point -->
+  <script type="module" src="./main.ts"></script>
+
+  <!-- Lazy loading para imagens de logo -->
+  <script>
+    // Lazy load para logos das lojas
+    if ('loading' in HTMLImageElement.prototype) {
+      document.querySelectorAll('img[data-src]').forEach(img => {
+        img.src = img.dataset.src;
+      });
+    } else {
+      // Fallback: simple lazy load
+      document.addEventListener('DOMContentLoaded', () => {
+        const io = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
+              if (img.dataset.src) img.src = img.dataset.src;
+              io.unobserve(img);
+            }
+          });
+        });
+        document.querySelectorAll('img[data-src]').forEach(img => io.observe(img));
+      });
+    }
+  </script>
+</body>
+</html>
