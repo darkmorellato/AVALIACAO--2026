@@ -51,10 +51,10 @@ export function getChartTheme(): ChartTheme {
   }
 
   return {
-    textColor: '#111827',
-    secondaryColor: '#6B7280',
-    gridColor: 'rgba(0, 0, 0, 0.05)',
-    datalabelColor: '#374151',
+    textColor: '#000000',
+    secondaryColor: '#374151',
+    gridColor: 'rgba(0, 0, 0, 0.08)',
+    datalabelColor: '#000000',
     tooltipBg: '#0f172a',
     tooltipColor: '#F3F4F6',
   };
