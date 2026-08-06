@@ -1,0 +1,35 @@
+{
+  "label": "Julho 2026",
+  "data": {
+    "DOM PEDRO": {
+      "prev": 1023,
+      "current": 1066,
+      "sales": 99,
+      "evaluated": 43
+    },
+    "KASSOUF": {
+      "prev": 627,
+      "current": 633,
+      "sales": 38,
+      "evaluated": 6
+    },
+    "PREMIUM": {
+      "prev": 676,
+      "current": 705,
+      "sales": 65,
+      "evaluated": 29
+    },
+    "REALME": {
+      "prev": 464,
+      "current": 478,
+      "sales": 57,
+      "evaluated": 14
+    },
+    "XV": {
+      "prev": 361,
+      "current": 378,
+      "sales": 37,
+      "evaluated": 17
+    }
+  }
+}
