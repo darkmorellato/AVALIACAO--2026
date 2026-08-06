@@ -15,12 +15,9 @@ import { type ChartTheme } from '../types/index';
  * @returns `true` se o modo escuro estiver ativo, caso contrário `false`.
  */
 function isDarkMode(): boolean {
-  // Prioriza a classe 'dark' no documento (comum em frameworks como Tailwind)
-  if (document.documentElement.classList.contains('dark')) {
-    return true;
-  }
-
-  // Verifica a preferência do sistema operacional
+  const stored = localStorage.getItem('theme-preference');
+  if (stored === 'dark') return true;
+  if (stored === 'light') return false;
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
