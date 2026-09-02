@@ -20,7 +20,7 @@ export function buildTrendChartData(
   database: Record<string, { label: string; data: Record<string, RawStoreData> }>,
 ): ChartData<'line'> {
   const periods = Object.keys(database).sort();
-  const labels = periods.map((key) => database[key]?.label ?? '').filter(label => label);
+  const labels = periods.map((key) => database[key]?.label || key);
 
   const allStores = new Set<string>();
   periods.forEach((p) => {

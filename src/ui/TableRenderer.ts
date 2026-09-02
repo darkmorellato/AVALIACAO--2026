@@ -70,15 +70,15 @@ export class TableRenderer {
         <td>
           <div class="store-cell">
             <div class="store-logo-wrapper" style="--brand-color: ${brandColor}; border-color: var(--brand-color);">
-              <img src="${logoUrl}" alt="Logo ${item.loja}" class="store-logo-img">
+              <img src="${logoUrl}" alt="Logo ${item.loja}" class="store-logo-img" loading="lazy">
             </div>
             <span class="store-name-text">${item.loja}</span>
           </div>
         </td>
-        <td class="text-center">${item.prev}</td>
-        <td class="text-center">${item.current}</td>
+        <td class="text-center">${item.prev.toLocaleString('pt-BR')}</td>
+        <td class="text-center">${item.current.toLocaleString('pt-BR')}</td>
         <td class="text-center">${item.sales.toLocaleString('pt-BR')}</td>
-        <td class="text-center">${item.evaluated}</td>
+        <td class="text-center">${item.evaluated.toLocaleString('pt-BR')}</td>
         <td class="text-center">
           <span class="perf-badge ${item.aproveitamento >= 70 ? 'perf-badge-high' : 'perf-badge-low'}" style="background-color: ${color}0D; border-color: ${color}33; color: ${color};">
             ${item.aproveitamento.toFixed(2)}%

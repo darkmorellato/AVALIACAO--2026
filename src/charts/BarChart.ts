@@ -23,32 +23,24 @@ export class BarChartManager {
 
   async preloadLogos(): Promise<void> {
     const storeNames = Object.keys(CONFIG.storeLogos);
-    const supportsWebP = await this.checkWebPSupport();
-    const promises = storeNames.map(async (storeName) => {
-      const originalUrl = CONFIG.storeLogos[storeName];
-      const url = supportsWebP ? originalUrl.replace('.png', '.webp') : originalUrl;
+    const promises = storeNames.map((storeName) => {
+      const url = CONFIG.storeLogos[storeName];
+      if (!url) return Promise.resolve();
+
       return new Promise<void>((resolve) => {
         const img = new Image();
-        img.onload = () => { this.loadedImages.set(storeName, img); resolve(); };
+        img.onload = () => {
+          this.loadedImages.set(storeName, img);
+          resolve();
+        };
         img.onerror = () => {
-          if (url !== originalUrl) {
-            const fallback = new Image();
-            fallback.onload = () => { this.loadedImages.set(storeName, fallback); resolve(); };
-            fallback.src = originalUrl;
-          } else resolve();
+          this.logger.warn(`Falha ao carregar logo para ${storeName} em ${url}`);
+          resolve();
         };
         img.src = url;
       });
     });
     await Promise.all(promises);
-  }
-
-  private checkWebPSupport(): Promise<boolean> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = img.onerror = () => resolve(img.naturalWidth > 0);
-      img.src = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4TAYAAAAvAAAAAAfQ//73v/+BiOh/AAA=';
-    });
   }
 
   render(storesData: Record<string, RawStoreData>): void {
@@ -116,9 +108,9 @@ export class BarChartManager {
       tooltip: {
         backgroundColor: theme.tooltipBg, titleColor: theme.tooltipColor, bodyColor: theme.tooltipColor,
         borderColor: 'rgba(99, 102, 241, 0.4)', borderWidth: 1, padding: 12, cornerRadius: 8,
-        titleFont: { family: "'Inter', system-ui, sans-serif", weight: "bold" as const, size: 13 },
-        bodyFont: { family: "'Inter', system-ui, sans-serif", size: 12 },
-        footerFont: { family: "'Inter', system-ui, sans-serif", weight: "bold" as const, size: 12 },
+        titleFont: { family: "'Plus Jakarta Sans', 'Inter', sans-serif", weight: "bold" as const, size: 13 },
+        bodyFont: { family: "'Plus Jakarta Sans', 'Inter', sans-serif", size: 12 },
+        footerFont: { family: "'Plus Jakarta Sans', 'Inter', sans-serif", weight: "bold" as const, size: 12 },
         callbacks: {
           label: (context: any) => {
             const label = context.label;

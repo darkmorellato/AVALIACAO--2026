@@ -28,9 +28,9 @@ export function buildTrendChartOptions(): ChartOptions<'line'> {
         borderWidth: 1,
         padding: 12,
         cornerRadius: 8,
-        titleFont: { family: "'Inter', system-ui, sans-serif", weight: 'bold', size: 13 },
-        bodyFont: { family: "'Inter', system-ui, sans-serif", size: 12 },
-        footerFont: { family: "'Inter', system-ui, sans-serif", weight: 'bold', size: 12 },
+        titleFont: { family: "'Plus Jakarta Sans', 'Inter', sans-serif", weight: 'bold', size: 13 },
+        bodyFont: { family: "'Plus Jakarta Sans', 'Inter', sans-serif", size: 12 },
+        footerFont: { family: "'Plus Jakarta Sans', 'Inter', sans-serif", weight: 'bold', size: 12 },
         callbacks: {
           label: (context) => {
             const label = context.dataset.label || '';

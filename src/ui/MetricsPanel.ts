@@ -32,8 +32,7 @@ export class MetricsPanel {
   }
 
   /**
-   * Atualiza as 4 métricas com animação de contador.
-   * Calcula os totais a partir dos dados das lojas e anima cada card.
+   * Atualiza as 4 métricas com animação de contador e calcula os badges de tendência.
    *
    * @param storesData - Mapeamento de nome da loja para seus dados brutos.
    */
@@ -49,7 +48,41 @@ export class MetricsPanel {
     animateValue('total-sales', totals.sales);
     animateValue('total-evaluated', totals.evaluated);
 
+    this.updateBadges(totals);
+
     this.logger.info('Métricas atualizadas com sucesso');
+  }
+
+  /**
+   * Atualiza os badges de tendência nos cards com cálculos reais.
+   */
+  private updateBadges(totals: ReturnType<typeof calcTotals>): void {
+    // Variação de avaliações: (recentes - anteriores) / anteriores
+    const reviewsGrowth = totals.prevReviews > 0
+      ? ((totals.currentReviews - totals.prevReviews) / totals.prevReviews) * 100
+      : 0;
+
+    this.renderBadge('badge-reviews', reviewsGrowth, '%');
+
+    // Taxa de conversão geral: avaliadas / vendas
+    const conversionRate = totals.sales > 0
+      ? (totals.evaluated / totals.sales) * 100
+      : 0;
+
+    this.renderBadge('badge-evaluated', conversionRate, '% taxa');
+  }
+
+  private renderBadge(badgeId: string, value: number, suffix: string): void {
+    const badge = document.getElementById(badgeId);
+    if (!badge) return;
+
+    const isPositive = value >= 0;
+    const sign = isPositive ? '+' : '';
+    const icon = isPositive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+    const cls = isPositive ? 'positive' : 'negative';
+
+    badge.className = `trend-badge ${cls}`;
+    badge.innerHTML = `<i class="fa-solid ${icon}"></i> ${sign}${value.toFixed(1)}${suffix}`;
   }
 
   /**

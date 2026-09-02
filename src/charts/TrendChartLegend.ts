@@ -37,15 +37,13 @@ export class TrendChartLegend {
       legendContainer.innerHTML = '';
     }
 
-    const topRow = document.createElement('div');
-    topRow.className = 'legend-top-row';
-    const bottomRow = document.createElement('div');
-    bottomRow.className = 'legend-bottom-row';
+    const legendList = document.createElement('div');
+    legendList.className = 'legend-top-row';
 
     chartData.datasets.forEach((dataset, index) => {
       const storeName = dataset.label || '';
       const logoUrl = CONFIG.storeLogos[storeName] || '';
-      const lineColor = dataset.borderColor as string || '#888888';
+      const lineColor = (dataset.borderColor as string) || '#888888';
 
       const item = document.createElement('div');
       item.className = 'trend-legend-item';
@@ -78,19 +76,10 @@ export class TrendChartLegend {
         item.classList.toggle('hidden-dataset', currentVisible);
       });
 
-      if (storeName === 'KASSOUF' || storeName === 'PREMIUM') {
-        bottomRow.appendChild(item);
-      } else if (storeName === 'DOM PEDRO' || storeName === 'XV' || storeName === 'REALME') {
-        topRow.appendChild(item);
-      } else {
-        topRow.appendChild(item);
-      }
+      legendList.appendChild(item);
     });
 
-    legendContainer.appendChild(topRow);
-    if (bottomRow.children.length > 0) {
-      legendContainer.appendChild(bottomRow);
-    }
+    legendContainer.appendChild(legendList);
   }
 
   remove(): void {

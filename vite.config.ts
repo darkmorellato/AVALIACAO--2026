@@ -17,6 +17,7 @@ export default defineConfig({
         // Code splitting automático, mas podemos forçar chunks menores
         manualChunks: {
           vendor: ['chart.js', 'chartjs-plugin-datalabels'],
+          pdf: ['jspdf', 'html2canvas'],
         }
       }
     }
