@@ -1,116 +1,130 @@
-# Painel de Vendas - Avaliação 2026
+# Painel de Vendas — Avaliação 2026
 
-Dashboard completo para análise de métricas de avaliações e vendas com gráficos interativos, tabela detalhada e exportação para PDF.
+Dashboard para análise de aproveitamento de avaliações por loja, com gráficos
+interativos, tabela detalhada e exportação para PDF.
 
 ## 🚀 Funcionalidades
 
-- 📊 **Gráficos interativos** (Chart.js): barras de aproveitamento, tendência temporal, comparativo
-- 📈 **Métricas principais** com animação de contadores
-- 📋 **Tabela detalhada** ordenada por desempenho com barras de progresso
-- 🌓 **Modo escuro** (dark mode) com detecção de preferência do sistema
-- 📄 **Exportação PDF** de alta qualidade
-- 📱 **Design responsivo** e acessível
+- 📊 **Gráfico de aproveitamento** (%) por loja, com logos sobre as barras
+- 📈 **Evolução temporal** com séries contínuas entre renomeações de loja
+- 🔀 **Comparativo** de vendas totais × vendas avaliadas
+- 📋 **Tabela detalhada** ordenada por aproveitamento, com barra de progresso
+- 🌓 **Modo escuro** com detecção da preferência do sistema e persistência
+- 📄 **Exportação em PDF** A4 paginado
+- 🧭 **Seletor de período** agrupado por ano
+- 📱 **Design responsivo**, com suporte a `prefers-reduced-motion`
 
-## 📦 Tecnologias
+## 📐 Modelo de dados
 
-- **TypeScript** - Tipagem estática
-- **Vite** - Build tool e dev server
-- **Chart.js** + **chartjs-plugin-datalabels** - Gráficos
-- **jsPDF** + **html2canvas** - Exportação PDF
-- **CSS moderno** - Variaveis CSS, dark mode, animações
+Cada loja em cada período declara quatro números:
 
-## 📁 Estrutura do Projeto
+| Campo | Significado |
+|---|---|
+| `prev` | Total acumulado de avaliações ao fim do mês anterior |
+| `current` | Total acumulado de avaliações ao fim do mês atual |
+| `sales` | Vendas realizadas no mês |
+| `evaluated` | Avaliações recebidas **no mês** |
+
+Duas invariantes validadas por `npm run audit`:
+
+1. `evaluated === current - prev`
+2. `prev` de um mês é igual a `current` do mês imediatamente anterior
+
+O aproveitamento é derivado: `(evaluated / sales) * 100`. Quando `sales` é zero,
+a loja aparece como **intervalo** no gráfico de tendência — nunca como zero.
+
+`evaluated` pode ser negativo quando a plataforma remove avaliações. Nesse caso o
+valor é exibido como negativo, sem clamp.
+
+## 📁 Estrutura
 
 ```
 ├── src/
-│   ├── charts/          # Gerenciadores de gráficos
-│   ├── constants/       # Configurações (CONFIG)
-│   ├── services/        # DataService, EventBus, Logger, PdfExporter
-│   ├── ui/              # DarkMode, MetricsPanel, TableRenderer
-│   ├── utils/           # Funções auxiliares (metrics, validators, theme)
-│   ├── types/           # Definições TypeScript
-│   ├── styles/          # CSS principal
-│   ├── App.ts           # Controlador principal
-│   ├── main.ts          # Entry point
-│   └── index.html       # Template
-├── public/              # Arquivos estáticos
-│   ├── periods.json
-│   ├── data-*.json
-│   └── Untitled-*.png   # Logos das lojas
-├── dist/                # Build de produção (gerado)
-└── legacy/              # Código legado JS (preservado)
+│   ├── App.ts              # Controlador principal
+│   ├── AppRefresh.ts       # Orquestra a renderização dos módulos
+│   ├── AppState.ts         # Estado do controlador
+│   ├── main.ts             # Entry point
+│   ├── index.html          # Template
+│   ├── charts/             # Gerenciadores e construtores de dados dos gráficos
+│   ├── constants/          # CONFIG (período padrão, logos, cores, thresholds)
+│   ├── services/           # DataService, EventBus, Logger, PdfExporter
+│   ├── styles/             # CSS principal
+│   ├── types/              # Contratos TypeScript
+│   ├── ui/                 # DarkMode, MetricsPanel, TableRenderer, Dropdown
+│   └── utils/              # metrics, validators, dom-utils, theme-helper
+├── public/
+│   ├── periods.json        # Lista de períodos disponíveis
+│   ├── data-YYYY-MM.json   # Dados de cada mês
+│   ├── sw.js               # Service worker
+│   └── Untitled-*.png      # Logos das lojas
+├── scripts/
+│   ├── audit-data.js       # Valida as invariantes dos dados
+│   └── verify-trend.js     # Valida a série do gráfico de tendência
+└── legacy/                 # Código JS anterior, preservado para referência
 ```
 
-## 🔧 Instalação
+## 🔧 Comandos
 
 ```bash
-# Clone o repositório (ou extraia os arquivos)
-# Navegue até a pasta do projeto
 npm install
+
+npm run dev            # Servidor de desenvolvimento
+npm run build          # Type-check + build de produção em dist/
+npm run preview        # Serve o build
+npm run type-check     # Apenas verificação de tipos
+
+npm run audit          # Valida os JSONs de dados
+npm run verify:trend   # Valida a série do gráfico de tendência
 ```
 
-## ▶️ Execução
+## ➕ Adicionando um mês novo
 
-### Desenvolvimento (hot-reload)
+1. Crie `public/data-YYYY-MM.json` com o `label` e as lojas do período.
+2. Calcule `evaluated` como `current - prev` e use o `current` do mês anterior
+   como `prev` desta loja.
+3. Registre o período em `public/periods.json`.
+4. Se o mês virar o padrão, atualize `defaultPeriod` em `src/constants/index.ts`
+   e o `<link rel="preload">` em `src/index.html`.
+5. Rode `npm run audit` e `npm run build`.
 
-```bash
-npm run dev
+### Renomeando uma loja
+
+Não duplique a loja em dois nomes, ou a série do gráfico de tendência se quebra.
+Registre o mapeamento antigo → novo em `CONFIG.storeAliases`:
+
+```ts
+storeAliases: {
+  'DOM PEDRO': 'HONOR',
+  'XV': 'XV PRIME',
+},
 ```
 
-Abra o navegador em `http://localhost:5173` (porta pode variar).
-
-### Build de produção
-
-```bash
-npm run build
-```
-
-Os arquivos otimizados serão gerados em `dist/`.
-
-### Preview do build
-
-```bash
-npm run preview
-```
-
-### Verificação de tipos
-
-```bash
-npm run type-check
-```
+O gráfico passa a exibir uma série única e contínua, rotulada com o nome atual.
+O `logo` e as `cores` do nome novo devem ser declarados em `CONFIG.storeLogos`
+e `CONFIG.colors`.
 
 ## ⚙️ Configuração
 
-Dados e configurações estão em `public/`:
+`src/constants/index.ts` concentra o período padrão, os logos, as paletas de
+cores e os thresholds de classificação do aproveitamento. Os thresholds são a
+única fonte de verdade usada por `getColorByPercent`.
 
-- `periods.json`: lista de períodos disponíveis
-- `data-YYYY-MM.json`: dados de cada mês
-- Imagens das lojas: `Untitled-*.png`
+## 📱 Notas de implantação
 
-Para alterar paletas de cores, logotipos ou período padrão, edite `src/constants/index.ts`.
+O app resolve dados e assets por caminho absoluto (`/periods.json`,
+`/data-*.json`, `/sw.js`), então a base do Vite é `/`. Publicar em um subdiretório
+exige trocar os caminhos absolutos por relativos em `DataService`, `index.html`
+e no registro do service worker.
 
-## 🐛 Solução de Problemas
+## 🐛 Solução de problemas
 
-### Erro ao carregar períodos/dados
+**Mês novo não aparece** — o `periods.json` é servido com estratégia network-first,
+então um hard reload resolve. Confirme que `dist/periods.json` contém o período.
 
-Verifique se os arquivos JSON estão em `public/` e acessíveis:
-- `http://localhost:5173/periods.json`
-- `http://localhost:5173/data-2026-04.json`
+**Loja sem logo** — a imagem precisa existir em `public/` com o nome exato
+declarado em `CONFIG.storeLogos`. Espaços no nome funcionam, mas evite
+caracteres especiais.
 
-### Gráficos não aparecem
-
-- Certifique-se de que o navegador tem suporte a ES modules
-- Verifique console do navegador (F12) para erros de JS
-- Confirme que os pacotes `chart.js` e `chartjs-plugin-datalabels` estão instalados
-
-### Logos não aparecem
-
-Os arquivos de imagem devem estar em `public/` com os nomes exatos definidos em `CONFIG.storeLogos`. Espaços nos nomes são suportados, mas recomenda-se evitar caracteres especiais.
-
-### Porta em uso
-
-Se a porta 5173 estiver ocupada, o Vite automaticamente usará outra (ex: 5174, 5175). Observe a URL exibida no terminal.
-
-## 📄 Licença
-
-Projeto privado - Avaliação 2026.
+**Gráfico não aparece** — verifique o console do navegador. Um `data-*.json`
+malformado é rejeitado pelo `DataService` e interrompe a inicialização; rode
+`npm run audit` para localizar o problema.

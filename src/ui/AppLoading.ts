@@ -8,6 +8,7 @@
 
 import { Logger } from '../services/Logger';
 import { MetricsPanel } from './MetricsPanel';
+import { escapeHtml } from '../utils/dom-utils';
 
 export class AppLoading {
   private isLoading = false;
@@ -43,13 +44,16 @@ export class AppLoading {
     errorContainer.innerHTML = `
       <div class="error-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
       <h3>Ocorreu um erro</h3>
-      <p>${message}</p>
+      <p>${escapeHtml(message)}</p>
       <button id="retryBtn" class="btn btn-retry">
         <i class="fa-solid fa-rotate-right"></i> Tentar novamente
       </button>
     `;
 
-    mainContent.insertBefore(errorContainer, mainContent.children[1]);
+    // Insere logo abaixo do cabeçalho quando ele existir; caso contrário,
+    // adiciona ao topo, já que `children[1]` nãoaria e lançaria erro.
+    const anchor = mainContent.children[1] ?? null;
+    mainContent.insertBefore(errorContainer, anchor);
     this.metricsPanel.showError(message);
   }
 }

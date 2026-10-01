@@ -56,6 +56,8 @@ export class AppRefresh {
 
     const database = this.buildDatabase(storesData, dataService);
 
+    this.updateStoreCount(Object.keys(storesData).length);
+
     metricsPanel.update(storesData);
     barChart.render(storesData);
     trendChart.render(database);
@@ -65,8 +67,18 @@ export class AppRefresh {
     this.logger.info('Refresh completo.');
   }
 
+  /**
+   * Atualiza o selo de lojas ativas no cabeçalho.
+   * A contagem varia por período, caso alguma loja não reporte vendas.
+   */
+  private updateStoreCount(count: number): void {
+    const badge = document.getElementById('store-count-badge');
+    if (!badge) return;
+    badge.textContent = `${count} ${count === 1 ? 'LOJA ATIVA' : 'LOJAS ATIVAS'}`;
+  }
+
   private buildDatabase(
-    storesData: Record<string, RawStoreData>,
+    _storesData: Record<string, RawStoreData>,
     dataService: DataService,
   ): Record<string, DatabaseEntry> {
     const db = dataService.getDatabase();

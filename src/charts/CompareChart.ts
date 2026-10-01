@@ -44,21 +44,8 @@ export class CompareChartManager {
 
     this.destroy();
 
-    // Verifica se há qualquer gráfico Chart.js ainda associado a este canvas
-    const existingChart = Chart.getChart(this.ctx);
-    if (existingChart) {
-      this.logger.debug('Gráfico existente encontrado no canvas, destruindo...');
-      existingChart.destroy();
-    }
-
-    // Limpa o canvas completamente
-    const tempCtx = this.ctx.getContext('2d');
-    if (tempCtx) {
-      tempCtx.clearRect(0, 0, this.ctx.width, this.ctx.height);
-    }
-
-    const ctx2d = this.ctx.getContext('2d');
-    if (!ctx2d) {
+    const ctx = this.ctx.getContext('2d');
+    if (!ctx) {
       this.logger.error('Não foi possível obter o contexto 2D.');
       return;
     }
@@ -66,7 +53,7 @@ export class CompareChartManager {
     const data = buildCompareChartData(storesData);
     const options = buildCompareChartOptions(storesData);
 
-    this.chart = new Chart(ctx2d, { type: 'bar', data, options });
+    this.chart = new Chart(ctx, { type: 'bar', data, options });
   }
 
   destroy(): void {

@@ -16,47 +16,93 @@ const DEFAULT_LINE_COLORS = [
   '#F97316', '#6366F1',
 ];
 
-export function buildTrendChartData(
-  database: Record<string, { label: string; data: Record<string, RawStoreData> }>,
-): ChartData<'line'> {
+/** Conjunto de períodos indexados, no formato entregue pelo DataService. */
+type PeriodDatabase = Record<string, { label: string; data: Record<string, RawStoreData> }>;
+
+/**
+ * Resolve o nome canônico de uma loja, seguindo renomeações.
+ *
+ * Uma loja que muda de nome (ex.: DOM PEDRO -> HONOR) precisa continuar
+ * na mesma série do gráfico de tendência. A chave mais recente vence:
+ * se o período mais recente já usa o nome novo, toda a série passa a
+ * exibir o nome novo e a linha permanece contínua.
+ *
+ * @param database - Todos os períodos, em qualquer ordem.
+ * @returns Função que mapeia um nome de loja ao seu nome canônico.
+ */
+function createAliasResolver(
+  database: PeriodDatabase,
+): (storeName: string) => string {
+  const latestPeriod = Object.keys(database).sort().pop();
+  const latestStores = latestPeriod ? (database[latestPeriod]?.data ?? {}) : {};
+
+  return (storeName: string): string => {
+    const alias = CONFIG.storeAliases[storeName];
+    // Só aplica o alias se o nome novo realmente existir no período mais
+    // recente; caso contrário a loja não foi renomeada ainda.
+    return alias && alias in latestStores ? alias : storeName;
+  };
+}
+
+/**
+ * Calcula o aproveitamento percentual de uma loja em um período.
+ *
+ * @returns O percentual, ou `null` quando a loja não existe no período ou
+ *   não houve vendas — nesses casos a série deve ter um intervalo (gap),
+ *   e não um zero artificial.
+ */
+function resolveAproveitamento(store: RawStoreData | undefined): number | null {
+  if (!store || store.sales === 0) return null;
+  return (store.evaluated / store.sales) * 100;
+}
+
+export function buildTrendChartData(database: PeriodDatabase): ChartData<'line'> {
   const periods = Object.keys(database).sort();
   const labels = periods.map((key) => database[key]?.label || key);
+  const resolveStore = createAliasResolver(database);
 
-  const allStores = new Set<string>();
-  periods.forEach((p) => {
-    const periodData = database[p];
-    if (periodData?.data) {
-      Object.keys(periodData.data).forEach((store) => allStores.add(store));
+  // Agrupa as lojas pelo nome canônico, para que uma renomeação produza
+  // uma única série contínua atravessando o limite entre os meses.
+  const series = new Map<string, (number | null)[]>();
+  const lastKnownName = new Map<string, string>();
+
+  periods.forEach((period, periodIndex) => {
+    const periodData = database[period]?.data ?? {};
+
+    for (const [rawName, store] of Object.entries(periodData)) {
+      const storeName = resolveStore(rawName);
+
+      if (!series.has(storeName)) {
+        series.set(storeName, new Array<number | null>(periods.length).fill(null));
+      }
+      series.get(storeName)![periodIndex] = resolveAproveitamento(store);
+      lastKnownName.set(storeName, rawName);
     }
   });
-  const sortedStores = Array.from(allStores).sort();
 
-  const datasets = sortedStores.map((storeName, index) => {
-    const data = periods.map((period) => {
-      const periodData = database[period];
-      if (!periodData?.data) return 0;
-      const storeData = periodData.data[storeName];
-      if (!storeData || storeData.sales === 0) return 0;
-      return (storeData.evaluated / storeData.sales) * 100;
+  const datasets = Array.from(series.keys())
+    .sort()
+    .map((storeName, index) => {
+      const data = series.get(storeName)!;
+      const color = resolveStoreLineColor(storeName, index);
+
+      return {
+        // Exibe o nome mais recente da loja (ex.: HONOR, e não DOM PEDRO).
+        label: lastKnownName.get(storeName) ?? storeName,
+        data,
+        borderColor: color,
+        backgroundColor: color,
+        fill: false,
+        tension: 0.3,
+        spanGaps: false,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: color,
+        pointBorderColor: '#FFFFFF',
+        pointBorderWidth: 2,
+        borderWidth: 3,
+      };
     });
-
-    const color = resolveStoreLineColor(storeName, index);
-
-    return {
-      label: storeName,
-      data,
-      borderColor: color,
-      backgroundColor: color,
-      fill: false,
-      tension: 0.3,
-      pointRadius: 5,
-      pointHoverRadius: 7,
-      pointBackgroundColor: color,
-      pointBorderColor: '#FFFFFF',
-      pointBorderWidth: 2,
-      borderWidth: 3,
-    };
-  });
 
   return { labels, datasets };
 }

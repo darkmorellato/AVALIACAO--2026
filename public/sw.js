@@ -3,18 +3,8 @@
  * Cache de recursos estáticos e estratégia network-first para JSONs
  */
 
-const CACHE_NAME = 'avaliacao-2026-v1';
 const STATIC_CACHE = 'static-v1';
 const DATA_CACHE = 'data-v1';
-
-// Recursos estáticos para cache imediato
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  // CSS e JS bundles (serão gerados no build)
-  // Incluir padrões no install
-];
 
 // Estratégia: NetworkFirst para dados, CacheFirst para estáticos
 
@@ -56,8 +46,26 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Estratégia Stale-While-Revalidate para JSONs (dados)
-  if (url.pathname.startsWith('/data-') || url.pathname === '/periods.json') {
+  // NetworkFirst para o índice de períodos: ele muda sempre que um novo mês
+  // é publicado, e devolver o cache primeiro só faria o mês novo sumir até
+  // um segundo F5. O fallback offline continua vindo do cache.
+  if (url.pathname === '/periods.json') {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse.ok) {
+            const copy = networkResponse.clone();
+            caches.open(DATA_CACHE).then((cache) => cache.put(request, copy));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match('/')))
+    );
+    return;
+  }
+
+  // Estratégia Stale-While-Revalidate para os dados de cada período
+  if (url.pathname.startsWith('/data-')) {
     event.respondWith(
       caches.open(DATA_CACHE).then((cache) => {
         return cache.match(request).then((cachedResponse) => {

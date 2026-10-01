@@ -37,22 +37,8 @@ export class TrendChartManager {
     // Destrói instância anterior de forma mais robusta
     this.destroy();
 
-    // Verifica se há qualquer gráfico Chart.js ainda associado a este canvas
-    const existingChart = Chart.getChart(this.ctx);
-    if (existingChart) {
-      console.log('[TrendChartManager] Gráfico existente encontrado no canvas, destruindo...');
-      existingChart.destroy();
-    }
-
-    // Limpa o canvas completamente
-    const ctx2d = this.ctx.getContext('2d');
-    if (ctx2d) {
-      ctx2d.clearRect(0, 0, this.ctx.width, this.ctx.height);
-    }
-
-    // Obtém um novo contexto após limpeza
-    const ctxFresh = this.ctx.getContext('2d');
-    if (!ctxFresh) {
+    const ctx = this.ctx.getContext('2d');
+    if (!ctx) {
       console.error('[TrendChartManager] Não foi possível obter o contexto 2D.');
       return;
     }
@@ -60,7 +46,7 @@ export class TrendChartManager {
     const chartData = buildTrendChartData(database);
     const options = buildTrendChartOptions();
 
-    this.chart = new Chart(ctxFresh, { type: 'line', data: chartData, options });
+    this.chart = new Chart(ctx, { type: 'line', data: chartData, options });
     this.legend.setChart(this.chart);
     this.legend.render(chartData);
 

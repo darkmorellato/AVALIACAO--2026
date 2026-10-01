@@ -1,5 +1,8 @@
 node_modules/
 dist/
 .vite/
+.vite-tmp/
 *.log
+*.bak
 .env
+bundle-analysis.html

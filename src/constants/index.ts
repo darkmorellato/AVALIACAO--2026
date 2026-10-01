@@ -14,7 +14,7 @@ import { AppConfig } from '../types';
  */
 export const CONFIG: AppConfig = {
   /** Período padrão selecionado ao iniciar a aplicação. */
-  defaultPeriod: '2026-08',
+  defaultPeriod: '2026-09',
 
   /** Localidade para formatação de números e moedas. */
   currency: 'pt-BR',
@@ -26,10 +26,19 @@ export const CONFIG: AppConfig = {
     'PREMIUM': '/Untitled-premium.png',
     'REALME': '/Untitled-realme.png',
     'XV': '/Untitled-xv.png',
+    'HONOR': '/Untitled-dom pedro.png',
+    'XV PRIME': '/Untitled-xv.png',
   },
 
-  /** Extensão de imagem preferida */
-  preferredImageFormat: '.webp' as const,
+  /**
+   * Renomeações de loja: nome histórico -> nome atual.
+   * Usado para manter uma série única e contínua no gráfico de tendência
+   * quando uma loja muda de nome (ex.: DOM PEDRO -> HONOR em 09/2026).
+   */
+  storeAliases: {
+    'DOM PEDRO': 'HONOR',
+    'XV': 'XV PRIME',
+  },
 
   /** Paletas de cores por loja, utilizadas em gráficos e indicadores visuais. */
   colors: {
@@ -38,13 +47,19 @@ export const CONFIG: AppConfig = {
     'REALME': ['#ffea00', '#f4c430'],
     'PREMIUM': ['#bf953f', '#fcf6ba'],
     'XV': ['#000000', '#434343'],
+    'HONOR': ['#add8e6', '#2196f3'],
+    'XV PRIME': ['#000000', '#434343'],
   },
 
-  /** Limites (thresholds) para coloração de indicadores de aproveitamento. */
+  /**
+   * Limites (thresholds) para coloração de indicadores de aproveitamento.
+   * Escala sequencial: vermelho < laranja < amarelo < verde.
+   * Esta é a fonte de verdade usada por `getColorByPercent`.
+   */
   thresholds: {
     low: { max: 30, color: '#ef4444' },
-    medium: { max: 50, color: '#f59e0b' },
-    good: { max: 75, color: '#3b82f6' },
-    great: { max: 100, color: '#10b981' },
+    medium: { max: 50, color: '#f97316' },
+    good: { max: 75, color: '#f59e0b' },
+    great: { max: 100, color: '#22c55e' },
   },
 };

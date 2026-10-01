@@ -46,6 +46,10 @@ export class AppController {
   private periodDisplay: HTMLElement | null = null;
   private dateFilter: HTMLElement | null = null;
 
+  /** Handlers globais, removidos em `destroy()` para evitar acúmulo em retries. */
+  private eventUnsubscribers: (() => void)[] = [];
+  private documentClickHandler: ((e: MouseEvent) => void) | null = null;
+
   constructor() {
     this.logger = new Logger('AppController');
     this.dataService = new DataService();
@@ -121,6 +125,9 @@ export class AppController {
       this.dataService.getPeriods(),
       this.state.currentPeriod,
       (p) => this.switchPeriod(p),
+      // Usa o rótulo declarado no próprio JSON do período, para que o
+      // seletor e o cabeçalho nunca divirjam do dado exibido.
+      (p) => this.dataService.getPeriodData(p)?.label || this.dropdown.formatPeriodLabel(p),
     );
   }
 
@@ -146,9 +153,9 @@ export class AppController {
   }
 
   private updatePeriodDisplay(period: string): void {
-    if (this.periodDisplay) {
-      this.periodDisplay.textContent = this.dropdown.formatPeriodLabel(period);
-    }
+    if (!this.periodDisplay) return;
+    this.periodDisplay.textContent =
+      this.dataService.getPeriodData(period)?.label || this.dropdown.formatPeriodLabel(period);
   }
 
   private doRefresh(): void {
@@ -180,13 +187,19 @@ export class AppController {
   }
 
   private setupEventListeners(): void {
-    eventBus.on('period:change', (p: string) => this.logger.debug('EventBus: period:change ->', p));
-    eventBus.on('theme:change', () => {
-      if (this.isInitialized) this.doRefresh();
-    });
+    this.teardownEventListeners();
 
-    document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
+    this.eventUnsubscribers.push(
+      eventBus.on('period:change', (p: string) => this.logger.debug('EventBus: period:change ->', p)),
+      eventBus.on('theme:change', () => {
+        if (this.isInitialized) this.doRefresh();
+      }),
+    );
+
+    this.documentClickHandler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
       const retryBtn = target.closest('#retryBtn');
       if (retryBtn && !this.isInitialized && !this.initInProgress) {
         this.state.retryCount++;
@@ -197,13 +210,34 @@ export class AppController {
 
       const exportBtn = target.closest('#exportPdfBtn');
       if (exportBtn) {
-        this.pdfExporter.exportToPdf(this.state.currentPeriod);
+        // Passa o rótulo legível do período para que o arquivo saia como
+        // "relatorio-vendas-setembro-2026.pdf".
+        this.pdfExporter.exportToPdf(
+          this.dataService.getPeriodData(this.state.currentPeriod)?.label ??
+            this.state.currentPeriod,
+        );
       }
-    });
+    };
+
+    document.addEventListener('click', this.documentClickHandler);
+  }
+
+  /** Remove todos os listeners globais registrados por {@link setupEventListeners}. */
+  private teardownEventListeners(): void {
+    if (this.documentClickHandler) {
+      document.removeEventListener('click', this.documentClickHandler);
+      this.documentClickHandler = null;
+    }
+
+    for (const unsubscribe of this.eventUnsubscribers) {
+      unsubscribe();
+    }
+    this.eventUnsubscribers = [];
   }
 
   destroy(): void {
     this.logger.info('Destruindo AppController...');
+    this.teardownEventListeners();
     document.getElementById('app-error-state')?.remove();
     this.barChart?.destroy();
     this.trendChart?.destroy();

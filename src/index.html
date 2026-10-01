@@ -24,7 +24,8 @@
 
   <!-- Preload de recursos críticos -->
   <link rel="preload" href="/periods.json" as="fetch" crossorigin="anonymous">
-  <link rel="preload" href="/data-2026-08.json" as="fetch" crossorigin="anonymous">
+  <!-- O período padrão é definido em src/constants/index.ts (CONFIG.defaultPeriod). -->
+  <link rel="preload" href="/data-2026-09.json" as="fetch" crossorigin="anonymous">
 
   <!-- Preload das logos importantes -->
   <link rel="preload" href="/Untitled-dom pedro.png" as="image" type="image/png">
@@ -76,7 +77,7 @@
           <!-- Status Badges da Referência Visual -->
           <div class="pill-badge pill-badge-neutral">
             <span class="pill-dot dark-dot"></span>
-            <span>5 LOJAS ATIVAS</span>
+            <span id="store-count-badge">— LOJAS ATIVAS</span>
           </div>
 
           <div class="pill-badge pill-badge-live">

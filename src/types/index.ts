@@ -101,8 +101,8 @@ export interface AppConfig {
   /** Mapeia o nome da loja para o nome do arquivo de logotipo correspondente. */
   storeLogos: Record<string, string>;
 
-  /** Extensão de imagem preferida (ex: '.webp', '.png') */
-  preferredImageFormat: string;
+  /** Mapeia nomes históricos de loja para o nome atual (ex.: 'DOM PEDRO' -> 'HONOR'). */
+  storeAliases: Record<string, string>;
 
   /** Mapeia o nome da loja para o par de cores [cor1, cor2] utilizadas nos gráficos. */
   colors: Record<string, [string, string]>;

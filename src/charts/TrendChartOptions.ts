@@ -47,7 +47,9 @@ export function buildTrendChartOptions(): ChartOptions<'line'> {
       },
       y: {
         ticks: { color: theme.textColor, font: { size: 11 }, callback: (v) => `${v}%` },
-        min: 0,
+        // Sem `min` fixo: o aproveitamento pode ser negativo quando há
+        // avaliações removidas da plataforma (ex.: HONOR em 09/2026, -4,00%).
+        suggestedMin: 0,
         suggestedMax: 100,
         grid: { color: theme.gridColor },
       },

@@ -22,7 +22,7 @@ interface ListenerEntry {
 }
 
 const MONTHS: Record<string, string> = {
-  '01': 'Janeiro', '02': 'Fevereiro', '03': 'Marco', '04': 'Abril',
+  '01': 'Janeiro', '02': 'Fevereiro', '03': 'Março', '04': 'Abril',
   '05': 'Maio', '06': 'Junho', '07': 'Julho', '08': 'Agosto',
   '09': 'Setembro', '10': 'Outubro', '11': 'Novembro', '12': 'Dezembro',
 };
@@ -47,6 +47,7 @@ export class DropdownController {
     periods: readonly string[],
     currentPeriod: string,
     onSelect: (period: string) => void,
+    getLabel?: (period: string) => string,
   ): void {
     container.innerHTML = '';
 
@@ -54,7 +55,10 @@ export class DropdownController {
     dropdown.className = 'custom-dropdown';
     dropdown.id = 'periodDropdown';
 
-    const trigger = createDropdownTrigger(currentPeriod, (p) => this.formatPeriodLabel(p));
+    const trigger = createDropdownTrigger(
+      currentPeriod,
+      (p) => getLabel?.(p) ?? this.formatPeriodLabel(p),
+    );
     const menu = createDropdownMenu(periods, currentPeriod);
 
     dropdown.appendChild(trigger);

@@ -9,7 +9,7 @@
  */
 
 import { RawStoreData } from '../types/index';
-import { calcTotals, animateValue } from '../utils/metrics';
+import { calcTotals, animateValue, percent } from '../utils/metrics';
 import { Logger } from '../services/Logger';
 
 /** IDs dos elementos DOM usados pelas métricas principais. */
@@ -62,27 +62,46 @@ export class MetricsPanel {
       ? ((totals.currentReviews - totals.prevReviews) / totals.prevReviews) * 100
       : 0;
 
-    this.renderBadge('badge-reviews', reviewsGrowth, '%');
+    // A variação é uma diferença entre períodos, então o sinal +/- faz sentido.
+    this.renderBadge('badge-reviews', reviewsGrowth, '%', { showSign: true });
 
-    // Taxa de conversão geral: avaliadas / vendas
-    const conversionRate = totals.sales > 0
-      ? (totals.evaluated / totals.sales) * 100
-      : 0;
-
-    this.renderBadge('badge-evaluated', conversionRate, '% taxa');
+    // A taxa de aproveitamento é um nível, não uma variação: exibi-la como
+    // "+11,1% taxa" sugeriria um ganho em relação a outro período.
+    this.renderBadge('badge-evaluated', (totals.evaluated / (totals.sales || 1)) * 100, '% taxa', {
+      showSign: false,
+      percentFormat: true,
+    });
   }
 
-  private renderBadge(badgeId: string, value: number, suffix: string): void {
+  /**
+   * Renderiza um badge de tendência.
+   *
+   * @param badgeId - Id do elemento do badge.
+   * @param value - Valor numérico a exibir.
+   * @param suffix - Sufixo textual (ex.: '%' ou '% taxa').
+   * @param options - `showSign` exibe '+'/'-'; `percentFormat` usa duas casas.
+   */
+  private renderBadge(
+    badgeId: string,
+    value: number,
+    suffix: string,
+    options: { showSign?: boolean; percentFormat?: boolean } = {},
+  ): void {
     const badge = document.getElementById(badgeId);
     if (!badge) return;
 
+    const { showSign = true, percentFormat = false } = options;
     const isPositive = value >= 0;
-    const sign = isPositive ? '+' : '';
+    const sign = showSign && isPositive ? '+' : '';
     const icon = isPositive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
     const cls = isPositive ? 'positive' : 'negative';
+    const formatted = percentFormat
+      ? percent(value, 100).replace('%', '')
+      : value.toFixed(1);
 
     badge.className = `trend-badge ${cls}`;
-    badge.innerHTML = `<i class="fa-solid ${icon}"></i> ${sign}${value.toFixed(1)}${suffix}`;
+    // `formatted` e `suffix` são números/texto já formatados, nunca entrada externa.
+    badge.innerHTML = `<i class="fa-solid ${icon}"></i> ${sign}${formatted}${suffix}`;
   }
 
   /**

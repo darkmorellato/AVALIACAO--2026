@@ -50,14 +50,12 @@ export class BarChartManager {
     }
 
     this.destroy();
-    const existing = Chart.getChart(this.ctx);
-    if (existing) existing.destroy();
-
-    const tempCtx = this.ctx.getContext('2d');
-    tempCtx?.clearRect(0, 0, this.ctx.width, this.ctx.height);
 
     const ctx = this.ctx.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      this.logger.error('Não foi possível obter o contexto 2D do canvas.');
+      return;
+    }
 
     const theme = getChartTheme();
     const labels = Object.keys(storesData);
@@ -72,7 +70,12 @@ export class BarChartManager {
       return store.sales > 0 ? (store.evaluated / store.sales) * 100 : 0;
     }).map(v => Number(v) || 0);
 
-    const maxLimit = Math.max(100, Math.round(Math.max(...values, 0) * 1.5));
+    // O aproveitamento pode ser negativo (avaliações removidas), então o
+    // eixo precisa de folga abaixo de zero, e não só acima de 100.
+    const maxValue = Math.max(...values, 0);
+    const minValue = Math.min(...values, 0);
+    const maxLimit = Math.max(100, Math.round(maxValue * 1.5));
+    const minLimit = minValue < 0 ? Math.floor(minValue * 1.5) : 0;
     const colors = labels.map(name => {
       const palette = CONFIG.colors[name];
       return palette ? this.makeGradient(ctx, palette) : '#888888';
@@ -86,7 +89,7 @@ export class BarChartManager {
       layout: { padding: { top: 60, right: 20, bottom: 10, left: 10 } },
       scales: {
         x: { ticks: { color: theme.textColor, font: { size: 11 } }, grid: { display: false } },
-        y: { beginAtZero: true, max: maxLimit, ticks: { color: theme.textColor, font: { size: 11 }, callback: v => `${v}%` }, grid: { color: theme.gridColor } },
+        y: { beginAtZero: true, min: minLimit, max: maxLimit, ticks: { color: theme.textColor, font: { size: 11 }, callback: v => `${v}%` }, grid: { color: theme.gridColor } },
       },
       animation: { duration: getAnimationDuration(800, 400), easing: 'easeOutQuart' },
       resizeDelay: 100,
@@ -113,11 +116,18 @@ export class BarChartManager {
         footerFont: { family: "'Plus Jakarta Sans', 'Inter', sans-serif", weight: "bold" as const, size: 12 },
         callbacks: {
           label: (context: any) => {
-            const label = context.label;
+            const label = context.label as string | undefined;
             const raw = context.raw;
-            if (!label || raw == null) return '';
+            if (!label || typeof raw !== 'number') return '';
+
             const store = storesData[label];
-            return [`Vendas Totais: ${store.sales.toLocaleString('pt-BR')}`, `Vendas Avaliadas: ${store.evaluated.toLocaleString('pt-BR')}`, `Aproveitamento: ${raw.toFixed(2)}%`];
+            if (!store) return '';
+
+            return [
+              `Vendas Totais: ${store.sales.toLocaleString('pt-BR')}`,
+              `Vendas Avaliadas: ${store.evaluated.toLocaleString('pt-BR')}`,
+              `Aproveitamento: ${raw.toFixed(2)}%`,
+            ];
           },
         },
       },

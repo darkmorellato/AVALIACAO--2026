@@ -73,25 +73,31 @@ export class PdfExporter {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
 
-      const imgWidth = pdfWidth - 20; // 10mm margem cada lado
+      const margin = 10;
+      const imgWidth = pdfWidth - margin * 2;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pageContentHeight = pdfHeight - margin * 2;
 
-      let position = 10;
-      let heightLeft = imgHeight;
+      // Desloca a mesma imagem para cima, página a página, de forma que cada
+      // página exiba a faixa vertical seguinte do render. A posição é sempre
+      // negativa a partir da segunda página, o que recorta o trecho anterior.
+      let offset = 0;
+      pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
 
-      // Primeira página
-      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-      heightLeft -= (pdfHeight - 20);
-
-      // Páginas subsequentes caso o conteúdo exceda uma página
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight + 10;
+      while (offset + pageContentHeight < imgHeight) {
+        offset += pageContentHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-        heightLeft -= (pdfHeight - 20);
+        pdf.addImage(imgData, 'PNG', margin, margin - offset, imgWidth, imgHeight);
       }
 
-      const filename = `relatorio-vendas-${currentPeriod}.pdf`;
+      // Usa o rótulo legível ("setembro-2026") em vez do id cru ("2026-09").
+      const slug = currentPeriod
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+      const filename = `relatorio-vendas-${slug || 'dashboard'}.pdf`;
       pdf.save(filename);
       this.logger.info(`PDF exportado com sucesso: ${filename}`);
     } catch (error) {

@@ -11,33 +11,30 @@ import {
   type RawStoreData,
   type MetricTotals,
 } from '../types/index';
-
-/** Valores de thresholds padrão extraídos da configuração. */
-const THRESHOLDS = {
-  low: 30,
-  medium: 50,
-  good: 75,
-  great: 100,
-} as const;
+import { CONFIG } from '../constants/index';
 
 /**
  * Retorna uma cor hexadecimal baseada no valor percentual fornecido.
- * A escala de cores segue o padrão: vermelho < laranja < amarelo < verde.
+ *
+ * Os limites e as cores vêm de `CONFIG.thresholds`, que é a única fonte de
+ * verdade — antes havia uma cópia local com cores divergentes.
  *
  * @param value - O valor percentual a ser avaliado.
  * @returns A cor hexadecimal correspondente ao threshold.
  *
  * @example
  * ```ts
- * getColorByPercent(45); // '#EF4444'
- * getColorByPercent(80); // '#F59E0B'
+ * getColorByPercent(25); // '#ef4444'
+ * getColorByPercent(90); // '#10b981'
  * ```
  */
 export function getColorByPercent(value: number): string {
-  if (value <= THRESHOLDS.low) return '#EF4444'; // vermelho
-  if (value <= THRESHOLDS.medium) return '#F97316'; // laranja
-  if (value <= THRESHOLDS.good) return '#F59E0B'; // amarelo
-  return '#22C55E'; // verde
+  const { low, medium, good, great } = CONFIG.thresholds;
+
+  if (value <= low.max) return low.color;
+  if (value <= medium.max) return medium.color;
+  if (value <= good.max) return good.color;
+  return great.color;
 }
 
 /**
@@ -56,7 +53,12 @@ export function getColorByPercent(value: number): string {
 export function percent(part: number, total: number): string {
   if (total === 0) return '0,00%';
   const result = (part / total) * 100;
-  return `${result.toFixed(2).replace('.', ',')}%`;
+  // `toLocaleString` em vez de `.replace('.', ',')`: o replace quebrava
+  // com separador de milhar (1234.56 virava "1234,56", sem o ponto).
+  return `${result.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}%`;
 }
 
 /**
@@ -110,12 +112,33 @@ export function calcTotals(
  * animateValue('total-reviews', 150);
  * ```
  */
+const activeAnimations = new Map<string, number>();
+
+/**
+ * Cancela qualquer animação de contador em andamento para o elemento informado.
+ *
+ * Sem isso, trocas rápidas de período deixam vários laços de
+ * `requestAnimationFrame` disputando o `textContent` do mesmo elemento,
+ * e o contador pode parar em um valor intermediário errado.
+ *
+ * @param id - O identificador do elemento DOM.
+ */
+export function cancelAnimation(id: string): void {
+  const frame = activeAnimations.get(id);
+  if (frame !== undefined) {
+    cancelAnimationFrame(frame);
+    activeAnimations.delete(id);
+  }
+}
+
 export function animateValue(id: string, end: number): void {
   const element = document.getElementById(id);
   if (!element) {
     console.warn(`[metrics] Elemento com id "${id}" não encontrado para animação.`);
     return;
   }
+
+  cancelAnimation(id);
 
   const duration = 1000;
   const start = 0;
@@ -132,11 +155,15 @@ export function animateValue(id: string, end: number): void {
     element.textContent = current.toLocaleString('pt-BR');
 
     if (progress < 1) {
-      requestAnimationFrame(update);
+      const frame = requestAnimationFrame(update);
+      activeAnimations.set(id, frame);
+    } else {
+      activeAnimations.delete(id);
     }
   };
 
-  requestAnimationFrame(update);
+  const frame = requestAnimationFrame(update);
+  activeAnimations.set(id, frame);
 }
 
 /**

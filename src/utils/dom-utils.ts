@@ -49,6 +49,36 @@ export function getRequiredElement<T extends HTMLElement = HTMLElement>(id: stri
 }
 
 /**
+ * Escapa os caracteres especiais de HTML em um texto.
+ *
+ * Uso obrigatório antes de interpolar qualquer dado em `innerHTML`, para
+ * impedir que um nome de loja ou uma mensagem de erro seja interpretado
+ * como marcação.
+ *
+ * @param text - O texto a ser escapado.
+ * @returns O texto com `&`, `<`, `>`, `"` e `'` substituídos por entidades.
+ *
+ * @example
+ * ```ts
+ * escapeHtml('<img src=x onerror=alert(1)>');
+ * // '&lt;img src=x onerror=alert(1)&gt;'
+ * ```
+ */
+export function escapeHtml(text: unknown): string {
+  return String(text ?? '').replace(
+    /[&<>"']/g,
+    (char) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      })[char] as string,
+  );
+}
+
+/**
  * Define o conteúdo de texto de um elemento identificado pelo seu `id`.
  * Se o elemento não for encontrado, exibe um aviso no console e não realiza nenhuma ação.
  *

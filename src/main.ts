@@ -14,6 +14,7 @@
 import { AppController } from './App';
 import './styles/main.css';
 import { initWebVitalsMonitoring } from './utils/web-vitals';
+import { escapeHtml } from './utils/dom-utils';
 
 // Inicia monitoramento de Web Vitals
 if (import.meta.env.DEV) {
@@ -68,8 +69,9 @@ const app = new AppController();
 
 app.init().catch((error: unknown) => {
   console.error('Falha critica na inicializacao do aplicativo:', error);
-  // Exibe o erro na tela para ficar visível
-  const errorMsg = error instanceof Error ? error.message : String(error);
+  // Exibe o erro na tela para ficar visível. A mensagem é escapada porque
+  // pode conter o nome de um arquivo de dado, vindo de uma exceção.
+  const errorMsg = escapeHtml(error instanceof Error ? error.message : String(error));
   document.body.innerHTML = `
     <div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:Inter,sans-serif;color:#ef4444;background:#fef2f2;padding:20px;text-align:center;">
       <div>

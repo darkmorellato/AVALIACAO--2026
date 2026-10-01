@@ -9,9 +9,13 @@
 
 import { RawStoreData } from '../types/index';
 import { CONFIG } from '../constants/index';
-import { percent, getColorByPercent } from '../utils/metrics';
-import { getRequiredElement } from '../utils/dom-utils';
+import { getColorByPercent, clamp } from '../utils/metrics';
+import { getRequiredElement, escapeHtml } from '../utils/dom-utils';
 import { Logger } from '../services/Logger';
+
+/** Pixel 1x1 transparente, usado quando a loja não tem logo configurada. */
+const TRANSPARENT_PIXEL =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 /** Extensão de RawStoreData com o aproveitamento calculado. */
 interface StoreWithPerformance {
@@ -65,14 +69,18 @@ export class TableRenderer {
       const logoUrl = CONFIG.storeLogos[item.loja] || '';
       const colors = CONFIG.colors[item.loja];
       const brandColor = colors && colors.length > 0 ? colors[0] : '#6366f1';
+      const storeName = escapeHtml(item.loja);
+      // `src=""` faz o navegador reenviar a requisição da própria página,
+      // então usamos uma string vazia explícita quando não há logo.
+      const safeLogoUrl = escapeHtml(logoUrl) || TRANSPARENT_PIXEL;
 
       row.innerHTML = `
         <td>
           <div class="store-cell">
             <div class="store-logo-wrapper" style="--brand-color: ${brandColor}; border-color: var(--brand-color);">
-              <img src="${logoUrl}" alt="Logo ${item.loja}" class="store-logo-img" loading="lazy">
+              <img src="${safeLogoUrl}" alt="Logo ${storeName}" class="store-logo-img" loading="lazy">
             </div>
-            <span class="store-name-text">${item.loja}</span>
+            <span class="store-name-text">${storeName}</span>
           </div>
         </td>
         <td class="text-center">${item.prev.toLocaleString('pt-BR')}</td>
@@ -127,7 +135,7 @@ export class TableRenderer {
    * @returns String HTML da barra de progresso.
    */
   private createProgressBar(value: number, color: string): string {
-    const clamped = Math.min(Math.max(value, 0), 100);
+    const clamped = clamp(value, 0, 100);
     return `
       <div class="progress-cell-wrapper">
         <div class="progress-track">

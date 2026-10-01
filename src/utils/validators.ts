@@ -7,7 +7,7 @@
  * @date 2026-05-19
  */
 
-import { type Period, type Database } from '../types/index';
+import { type Period, type Database, type RawStoreData } from '../types/index';
 
 /**
  * Verifica se um valor qualquer é um objeto válido.
@@ -23,7 +23,8 @@ function isObject(data: unknown): data is Record<string, unknown> {
  * Type guard que verifica se um valor desconhecido conforma-se
  * com a interface {@link Period}.
  * 
- * Realiza verificações estruturais nas propriedades `label` (string) e `data` (objeto).
+ * Verifica as propriedades `label` (string) e `data` (objeto), além de validar
+ * profundamente cada loja dentro de `data` via {@link isValidStoreData}.
  *
  * @param data - O valor a ser validado.
  * @returns `true` se o valor for um `Period` válido, caso contrário `false`.
@@ -42,7 +43,46 @@ export function isValidPeriod(data: unknown): data is Period {
   const hasLabel = typeof data.label === 'string';
   const hasData = typeof data.data === 'object' && data.data !== null;
 
-  return hasLabel && hasData;
+  if (!hasLabel || !hasData) return false;
+
+  // Cada loja precisa ter os quatro campos numéricos, senão o dashboard
+  // quebra na renderização (ex.: `undefined.toLocaleString()` na tabela).
+  return Object.entries(data.data as Record<string, unknown>).every(
+    ([store, raw]) => isValidStoreData(raw, store),
+  );
+}
+
+/**
+ * Verifica se os dados brutos de uma loja estão estruturalmente corretos.
+ *
+ * Todos os campos devem ser números finitos. `evaluated` aceita valores
+ * negativos (avaliações removidas da plataforma), assim como `current`
+ * aceita valores menores que `prev` pelo mesmo motivo.
+ *
+ * @param raw - Os dados brutos da loja a serem validados.
+ * @param store - Nome da loja, usado apenas na mensagem de erro.
+ * @returns `true` se todos os campos forem números finitos.
+ */
+export function isValidStoreData(raw: unknown, store: string = 'loja'): boolean {
+  if (!isObject(raw)) {
+    console.warn(`[validators] Dados inválidos para "${store}": esperado um objeto.`);
+    return false;
+  }
+
+  const fields: (keyof RawStoreData)[] = ['prev', 'current', 'sales', 'evaluated'];
+  const invalid = fields.filter(
+    (field) => typeof raw[field] !== 'number' || !Number.isFinite(raw[field] as number),
+  );
+
+  if (invalid.length > 0) {
+    console.warn(
+      `[validators] Loja "${store}" com campos inválidos: ${invalid.join(', ')}. ` +
+        'Esperado números finitos.',
+    );
+    return false;
+  }
+
+  return true;
 }
 
 /**

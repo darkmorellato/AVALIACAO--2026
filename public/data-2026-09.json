@@ -1,0 +1,35 @@
+{
+  "label": "Setembro 2026",
+  "data": {
+    "HONOR": {
+      "prev": 1140,
+      "current": 1136,
+      "sales": 100,
+      "evaluated": -4
+    },
+    "KASSOUF": {
+      "prev": 633,
+      "current": 638,
+      "sales": 46,
+      "evaluated": 5
+    },
+    "REALME": {
+      "prev": 510,
+      "current": 529,
+      "sales": 33,
+      "evaluated": 19
+    },
+    "PREMIUM": {
+      "prev": 719,
+      "current": 726,
+      "sales": 32,
+      "evaluated": 7
+    },
+    "XV PRIME": {
+      "prev": 394,
+      "current": 399,
+      "sales": 46,
+      "evaluated": 5
+    }
+  }
+}

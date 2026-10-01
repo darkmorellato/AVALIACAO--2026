@@ -17,6 +17,24 @@ interface PeriodsResponse {
 }
 
 /**
+ * Congela um objeto e todos os seus objetos aninhados, recursivamente.
+ *
+ * @param value - O objeto a ser congelado.
+ * @returns O próprio objeto, agora profundamente imutável.
+ */
+function deepFreeze<T>(value: T): T {
+  if (typeof value !== 'object' || value === null || Object.isFrozen(value)) {
+    return value;
+  }
+
+  for (const nested of Object.values(value as Record<string, unknown>)) {
+    deepFreeze(nested);
+  }
+
+  return Object.freeze(value);
+}
+
+/**
  * Classe singleton para gerenciar dados do aplicativo.
  * Responsável por carregar, validar e disponibilizar dados de forma centralizada,
  * notificando os inscritos sempre que houver mudanças de estado.
@@ -63,7 +81,8 @@ export class DataService {
 
        this.database = { ...loadedDatabase };
        this.periods = Object.freeze([...periods]);
-       this.currentPeriod = this.periods[0] ?? '';
+       // Começa no período mais recente, não no primeiro da lista.
+       this.currentPeriod = this.periods[this.periods.length - 1] ?? '';
 
        this.logger.debug('Database carregado com', Object.keys(this.database).length, 'períodos');
        this.logger.info('DataService inicializado com sucesso. Períodos carregados:', this.periods);
@@ -82,9 +101,12 @@ export class DataService {
 
   /**
    * Retorna o banco de dados completo (somente leitura).
+   *
+   * O congelamento é profundo: os objetos de período e os dados de cada loja
+   * também ficam imutáveis, evitando que um consumidor altere a fonte.
    */
   getDatabase(): Readonly<Database> {
-    return Object.freeze({ ...this.database });
+    return deepFreeze(this.database);
   }
 
   /**
