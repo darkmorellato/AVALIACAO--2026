@@ -33,6 +33,10 @@ Duas invariantes validadas por `npm run audit`:
 O aproveitamento é derivado: `(evaluated / sales) * 100`. Quando `sales` é zero,
 a loja aparece como **intervalo** no gráfico de tendência — nunca como zero.
 
+O aproveitamento da **rede** é ponderado por vendas (`soma avaliadas / soma
+vendas`), o mesmo cálculo dos cartões do painel — não a média das lojas, que
+daria peso igual a uma loja de 32 vendas e a uma de 100.
+
 `evaluated` pode ser negativo quando a plataforma remove avaliações. Nesse caso o
 valor é exibido como negativo, sem clamp.
 
@@ -47,7 +51,7 @@ valor é exibido como negativo, sem clamp.
 │   ├── index.html          # Template
 │   ├── charts/             # Gerenciadores e construtores de dados dos gráficos
 │   ├── constants/          # CONFIG (período padrão, logos, cores, thresholds)
-│   ├── services/           # DataService, EventBus, Logger, PdfExporter
+│   ├── services/           # DataService, EventBus, Logger, PdfExporter, StoreReportPdf
 │   ├── styles/             # CSS principal
 │   ├── types/              # Contratos TypeScript
 │   ├── ui/                 # DarkMode, MetricsPanel, TableRenderer, Dropdown
@@ -59,7 +63,9 @@ valor é exibido como negativo, sem clamp.
 │   └── Untitled-*.png      # Logos das lojas
 ├── scripts/
 │   ├── audit-data.js       # Valida as invariantes dos dados
-│   └── verify-trend.js     # Valida a série do gráfico de tendência
+│   ├── verify-trend.js     # Valida a série do gráfico de tendência
+│   ├── optimize-logos.js   # Reduz e recomprime os logos
+│   └── render-report.js    # Gera o relatório por loja fora do navegador
 └── legacy/                 # Código JS anterior, preservado para referência
 ```
 
@@ -75,6 +81,28 @@ npm run type-check     # Apenas verificação de tipos
 
 npm run audit          # Valida os JSONs de dados
 npm run verify:trend   # Valida a série do gráfico de tendência
+npm run optimize:logos # Reduz e recomprime os logos (requer ImageMagick)
+npm run render:report  # Gera o relatório por loja em .vite-tmp/ para inspeção
+```
+
+## 📄 Relatórios em PDF
+
+O painel tem duas exportações:
+
+- **Exportar PDF** — captura a tela do dashboard com html2canvas. Fica igual ao
+  site, mas é uma imagem: sem texto pesquisável.
+- **Por loja** — gera um documento com jsPDF nativo, uma página por loja. O
+  texto é real e pesquisável, e o arquivo tem poucos KB.
+
+O relatório por loja tem uma página de resumo com o ranking do período e, para
+cada loja, os indicadores do mês, a comparação com a média histórica e com a
+aproveitamento da rede, os 10 meses de histórico e uma leitura em texto.
+
+Para conferir o layout sem abrir a interface:
+
+```bash
+npm run render:report           # usa o período 2026-09
+npm run render:report 2026-08   # ou outro período
 ```
 
 ## ➕ Adicionando um mês novo

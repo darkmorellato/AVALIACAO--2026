@@ -86,10 +86,16 @@
           </div>
 
           <!-- Botão Exportar PDF -->
-          <button id="exportPdfBtn" class="btn btn-export" type="button" aria-label="Exportar relatório em PDF">
-            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
-            <span>Exportar PDF</span>
-          </button>
+          <div class="export-actions">
+            <button id="exportPdfBtn" class="btn btn-export" type="button" aria-label="Exportar o dashboard atual em PDF">
+              <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+              <span>Exportar PDF</span>
+            </button>
+            <button id="exportStoresPdfBtn" class="btn btn-export" type="button" aria-label="Exportar o relatório de desempenho de cada loja em PDF">
+              <i class="fa-solid fa-store" aria-hidden="true"></i>
+              <span>Por loja</span>
+            </button>
+          </div>
 
           <!-- Seletor de Período -->
           <div class="date-filter" id="dateFilter" aria-label="Filtro de periodo">

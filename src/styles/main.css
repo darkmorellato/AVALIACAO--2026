@@ -282,6 +282,20 @@
   }
 }
 
+/* Agrupa os dois botões de exportação lado a lado, mantendo o segundo
+   visualmente secundário em relação ao relatório completo. */
+.export-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.export-actions .btn-export:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn-retry {
   background: var(--text);
   color: var(--main-bg);

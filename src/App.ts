@@ -24,6 +24,7 @@ import { CompareChartManager } from './charts/CompareChart';
 import { TableRenderer } from './ui/TableRenderer';
 import { MetricsPanel } from './ui/MetricsPanel';
 import { PdfExporter } from './services/PdfExporter';
+import { StoreReportPdf } from './services/StoreReportPdf';
 
 export class AppController {
   private dataService: DataService;
@@ -37,6 +38,7 @@ export class AppController {
   private dropdown: DropdownController;
   private refresh: AppRefresh;
   private pdfExporter: PdfExporter;
+  private storeReportPdf: StoreReportPdf;
 
   private logger: Logger;
   private isInitialized = false;
@@ -57,6 +59,7 @@ export class AppController {
     this.dropdown = new DropdownController();
     this.refresh = new AppRefresh();
     this.pdfExporter = new PdfExporter();
+    this.storeReportPdf = new StoreReportPdf();
     this.state = { ...DEFAULT_APP_STATE };
   }
 
@@ -216,10 +219,47 @@ export class AppController {
           this.dataService.getPeriodData(this.state.currentPeriod)?.label ??
             this.state.currentPeriod,
         );
+        return;
+      }
+
+      const storesBtn = target.closest('#exportStoresPdfBtn');
+      if (storesBtn) {
+        const period = this.state.currentPeriod;
+        const database = this.dataService.getDatabase();
+        if (!database[period]) {
+          this.logger.warn(`Sem dados carregados para o período "${period}".`);
+          return;
+        }
+        this.setButtonBusy(storesBtn as HTMLButtonElement, true, 'Gerando...');
+        this.storeReportPdf
+          .export(database as import('./types/index').Database, period)
+          .catch((error) => this.logger.error('Falha ao gerar relatório por loja:', error))
+          .finally(() => this.setButtonBusy(storesBtn as HTMLButtonElement, false));
       }
     };
 
     document.addEventListener('click', this.documentClickHandler);
+  }
+
+  /**
+   * Desabilita um botão e troca o rótulo enquanto uma operação roda.
+   *
+   * @param button - Elemento do botão.
+   * @param busy - Se `true`, mostra o estado de carregamento.
+   * @param label - Texto a exibir durante o carregamento.
+   */
+  private setButtonBusy(button: HTMLButtonElement, busy: boolean, label = ''): void {
+    if (busy) {
+      button.dataset.originalHtml = button.innerHTML;
+      button.disabled = true;
+      button.innerHTML = `<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> ${label}`;
+    } else {
+      button.disabled = false;
+      if (button.dataset.originalHtml) {
+        button.innerHTML = button.dataset.originalHtml;
+        delete button.dataset.originalHtml;
+      }
+    }
   }
 
   /** Remove todos os listeners globais registrados por {@link setupEventListeners}. */
