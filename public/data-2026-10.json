@@ -1,0 +1,35 @@
+{
+  "label": "Outubro 2026",
+  "data": {
+    "HONOR": {
+      "prev": 1136,
+      "current": 1172,
+      "sales": 97,
+      "evaluated": 36
+    },
+    "KASSOUF": {
+      "prev": 638,
+      "current": 638,
+      "sales": 20,
+      "evaluated": 0
+    },
+    "REALME": {
+      "prev": 529,
+      "current": 548,
+      "sales": 44,
+      "evaluated": 19
+    },
+    "PREMIUM": {
+      "prev": 726,
+      "current": 737,
+      "sales": 51,
+      "evaluated": 11
+    },
+    "XV PRIME": {
+      "prev": 399,
+      "current": 409,
+      "sales": 31,
+      "evaluated": 10
+    }
+  }
+}

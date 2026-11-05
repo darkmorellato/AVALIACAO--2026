@@ -101,7 +101,7 @@ aproveitamento da rede, os 10 meses de histórico e uma leitura em texto.
 Para conferir o layout sem abrir a interface:
 
 ```bash
-npm run render:report           # usa o período 2026-09
+npm run render:report           # usa o período 2026-10
 npm run render:report 2026-08   # ou outro período
 ```
 

@@ -14,7 +14,7 @@ import { AppConfig } from '../types';
  */
 export const CONFIG: AppConfig = {
   /** Período padrão selecionado ao iniciar a aplicação. */
-  defaultPeriod: '2026-09',
+  defaultPeriod: '2026-10',
 
   /** Localidade para formatação de números e moedas. */
   currency: 'pt-BR',

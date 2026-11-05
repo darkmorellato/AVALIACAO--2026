@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = join(ROOT, 'public');
-const period = process.argv[2] || '2026-09';
+const period = process.argv[2] || '2026-10';
 
 const bundle = await (async () => {
   execFileSync(
